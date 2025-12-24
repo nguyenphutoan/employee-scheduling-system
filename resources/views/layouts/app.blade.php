@@ -31,8 +31,21 @@
             width: var(--sidebar-width-collapsed) !important;
         }
 
+        .sidebar.collapsed .brand-link {
+            display: none !important; 
+        }
+
+        .sidebar.collapsed .header-bar {
+            justify-content: center !important; 
+            padding-left: 0 !important;
+        }
+
+        .sidebar.collapsed #sidebarToggle i::before {
+            content: "\f479";
+            font-size: 1.8rem;
+        }
+
         .sidebar.collapsed .link-text, 
-        .sidebar.collapsed .brand-text,
         .sidebar.collapsed .user-name {
             display: none; 
             opacity: 0;
@@ -49,10 +62,6 @@
         .sidebar.collapsed .nav-link i {
             margin-right: 0 !important;
             font-size: 1.2rem;
-        }
-
-        .sidebar.collapsed #sidebarToggle i::before {
-            content: "\f1c2"; 
         }
 
         .nav-link {
@@ -74,7 +83,10 @@
             color: white;
             font-size: 1.5rem;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -84,20 +96,20 @@
         @auth
         <div class="d-flex flex-column flex-shrink-0 p-3 text-white sidebar" id="sidebar">
             
-            <div class="d-flex align-items-center justify-content-between mb-3 mb-md-0 me-md-auto text-white text-decoration-none w-100">
+            <div class="header-bar d-flex align-items-center justify-content-between mb-3 mb-md-0 me-md-auto text-white text-decoration-none w-100">
                 <a href="/" class="d-flex align-items-center text-white text-decoration-none brand-link">
                     <i class="bi bi-clock-fill me-2 fs-4"></i>
                     <span class="fs-4 fw-bold brand-text">Scheduler</span>
                 </a>
+
                 <button id="sidebarToggle">
-                    <i class="bi bi-list"></i>
+                    <i class="bi bi-chevron-left"></i>
                 </button>
             </div>
 
             <hr>
             
             <ul class="nav nav-pills flex-column mb-auto">
-                
                 @if(Auth::user()->Role == 'Manager')
                     <li class="nav-item">
                         <a href="{{ route('manager.dashboard') }}" class="nav-link {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
