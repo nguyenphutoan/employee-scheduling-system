@@ -51,6 +51,10 @@
             font-size: 1.2rem;
         }
 
+        .sidebar.collapsed #sidebarToggle i::before {
+            content: "\f1c2"; 
+        }
+
         .nav-link {
             color: rgba(255, 255, 255, 0.8);
             display: flex;
@@ -70,6 +74,7 @@
             color: white;
             font-size: 1.5rem;
             cursor: pointer;
+            transition: transform 0.3s ease;
         }
     </style>
 </head>
@@ -80,8 +85,8 @@
         <div class="d-flex flex-column flex-shrink-0 p-3 text-white sidebar" id="sidebar">
             
             <div class="d-flex align-items-center justify-content-between mb-3 mb-md-0 me-md-auto text-white text-decoration-none w-100">
-                <a href="/" class="d-flex align-items-center text-white text-decoration-none">
-                    <i class="bi bi-grid-3x3-gap-fill me-2 fs-4"></i>
+                <a href="/" class="d-flex align-items-center text-white text-decoration-none brand-link">
+                    <i class="bi bi-clock-fill me-2 fs-4"></i>
                     <span class="fs-4 fw-bold brand-text">Scheduler</span>
                 </a>
                 <button id="sidebarToggle">
