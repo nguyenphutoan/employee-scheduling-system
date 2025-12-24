@@ -42,4 +42,4 @@ RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.c
 EXPOSE 80
 
 # Dòng này CÓ lệnh db:seed
-CMD php artisan migrate --force && php artisan db:seed --force && apache2-foreground
+CMD php artisan migrate --force && apache2-foreground
