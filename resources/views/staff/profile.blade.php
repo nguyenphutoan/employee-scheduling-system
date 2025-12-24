@@ -78,9 +78,15 @@
                         </div>
 
                         <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-success px-4 fw-bold">
-                                <i class="bi bi-save me-1"></i> Lưu mật khẩu mới
-                            </button>
+                            @if(!Auth::user()->EndDate)
+                                <button type="submit" class="btn btn-success px-4 fw-bold">
+                                    <i class="bi bi-save me-1"></i> Lưu mật khẩu mới
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-secondary px-4 fw-bold" disabled>
+                                    <i class="bi bi-lock-fill"></i> Đã khóa (Nghỉ việc)
+                                </button>
+                            @endif
                         </div>
                     </form>
                 </div>

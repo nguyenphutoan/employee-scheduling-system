@@ -25,9 +25,12 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
         <h4 class="mb-0 fw-bold text-primary"><i class="bi bi-people-fill"></i> Danh sách nhân viên</h4>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-            <i class="bi bi-person-plus-fill"></i> Thêm mới
-        </button>
+        {{-- Nút Thêm nhân viên --}}
+        @if(!Auth::user()->EndDate)
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                <i class="bi bi-person-plus-fill"></i> Thêm nhân viên
+            </button>
+        @endif
     </div>
 
     {{-- BẢNG DANH SÁCH --}}
@@ -56,10 +59,13 @@
                         
                         <td>{{ $user->FullName }}</td>
                         <td>{{ $user->email }}</td>
+
+                        @php 
+                            $Role = $user->Role ?? ''; 
+                        @endphp
                         
                         <td>
-                            @php $role = trim(strtolower($user->role ?? $user->Role ?? '')); @endphp
-                            @if($role == 'manager' || $role == 'admin')
+                            @if($Role == 'Manager')
                                 <span class="badge bg-danger">Quản lý</span>
                             @else
                                 <span class="badge bg-info text-dark">Nhân viên</span>
@@ -78,26 +84,44 @@
 
                         <td class="text-end pe-3">
                             <div class="d-flex justify-content-end gap-2">
-                                {{-- Nút Sửa: Truyền thêm UserName vào JS --}}
-                                <button class="btn btn-sm btn-outline-primary" 
-                                        onclick="editUser(
-                                            {{ $user->UserID }}, 
-                                            '{{ $user->UserName }}', 
-                                            '{{ $user->FullName }}', 
-                                            '{{ $user->email }}', 
-                                            '{{ $role }}', 
-                                            '{{ $user->StartDate }}', 
-                                            '{{ $user->EndDate }}'
-                                        )">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
+                                
+                                {{-- KIỂM TRA: Nếu Manager chưa nghỉ việc (EndDate là null) thì được phép thao tác --}}
+                                @if(!Auth::user()->EndDate && $user->Role != 'Manager')
+                                
+                                    {{-- 1. Nút Sửa --}}
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            onclick="editUser(
+                                                {{ $user->UserID }}, 
+                                                '{{ $user->UserName }}', 
+                                                '{{ $user->FullName }}', 
+                                                '{{ $user->email }}', 
+                                                '{{ $Role }}', 
+                                                '{{ $user->StartDate }}', 
+                                                '{{ $user->EndDate }}'
+                                            )">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
 
-                                <form action="{{ route('manager.employees.delete', $user->UserID) }}" method="POST" 
-                                      onsubmit="return confirm('Bạn có chắc muốn xóa nhân viên này?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                </form>
+                                    {{-- 2. Nút Xóa --}}
+                                    <form action="{{ route('manager.employees.delete', $user->UserID) }}" method="POST" 
+                                        onsubmit="return confirm('Bạn có chắc muốn xóa nhân viên này?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+
+                                @elseif($user->Role == 'Manager')
+                                    <span class="badge bg-warning text-dark border d-flex align-items-center" title="Đây là quản lý">
+                                        <i class="bi bi-shield-lock-fill me-1"></i> Quản lý
+                                    </span>
+                                @else
+                                    <span class="badge bg-light text-secondary border d-flex align-items-center">
+                                        <i class="bi bi-lock-fill me-1"></i> Chỉ xem
+                                    </span>
+                                @endif
+
                             </div>
                         </td>
                     </tr>
@@ -122,7 +146,7 @@
                     {{-- Input UserName --}}
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tên đăng nhập (UserName) <span class="text-danger">*</span></label>
-                        <input type="text" name="UserName" class="form-control" placeholder="vd: nguyenvan_a" required>
+                        <input type="text" name="UserName" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
@@ -140,9 +164,9 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Quyền hạn</label>
-                            <select name="role" class="form-select">
-                                <option value="staff" selected>Nhân viên</option>
-                                <option value="manager">Quản lý</option>
+                            <select name="Role" class="form-select">
+                                <option value="Staff" selected>Nhân viên</option>
+                                <option value="Manager">Quản lý</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -193,9 +217,9 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Quyền hạn</label>
-                            <select name="role" id="editRole" class="form-select">
-                                <option value="staff">Nhân viên</option>
-                                <option value="manager">Quản lý</option>
+                            <select name="Role" id="editRole" class="form-select">
+                                <option value="Staff">Nhân viên</option>
+                                <option value="Manager">Quản lý</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -220,7 +244,7 @@
 <script>
     function editUser(id, username, name, email, role, startDate, endDate) {
         // 1. Điền thông tin vào form
-        document.getElementById('editUserName').value = username; // <--- MỚI
+        document.getElementById('editUserName').value = username; 
         document.getElementById('editName').value = name;
         document.getElementById('editEmail').value = email;
         document.getElementById('editRole').value = role;

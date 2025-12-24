@@ -38,63 +38,74 @@ Route::middleware(['auth'])->group(function () {
     // ----------------------------------------------------
     // Prefix URL: /manager/... | Prefix Name: manager....
     Route::prefix('manager')->name('manager.')->group(function () {
-        
-        // 1. Dashboard & Lịch
-        // Trang chủ quản lý: Bảng tổng hợp lịch tuần (Matrix View)
+        // ====================================================
+        // (Manager đã nghỉ việc vẫn có thể truy cập các trang này)
+        // ====================================================
+        // 1. Dashboard & Lịch (Chỉ xem)
         Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('dashboard');
-        
-        // Trang xếp lịch: Kéo thả/Chọn nhân viên (Cũ là dashboard, giờ đổi thành scheduling)
-        Route::get('/scheduling', [ManagerController::class, 'scheduling'])->name('scheduling');
+        Route::get('/scheduling', [ManagerController::class, 'scheduling'])->name('scheduling'); // Vào trang xếp lịch xem, nhưng không lưu được
 
-        // 2. Thao tác Xử lý Lịch
-        Route::post('/create-week', [ManagerController::class, 'createWeek'])->name('create_week');
-        Route::post('/submit-week', [ManagerController::class, 'submitWeek'])->name('submit_week');
-        
-        // 3. Thao tác Phân công (Assignment)
-        Route::post('/assign', [ManagerController::class, 'assignStaff'])->name('assign');
-        Route::delete('/delete-assignment/{id}', [ManagerController::class, 'deleteAssignment'])->name('delete_assignment');
-
-        // 4. Quản lý Nhân viên (Employees CRUD)
+        // 2. Xem danh sách nhân viên
         Route::get('/employees', [ManagerController::class, 'indexEmployees'])->name('employees');
-        Route::post('/employees', [ManagerController::class, 'storeEmployee'])->name('employees.store');       // Thêm
-        Route::put('/employees/{id}', [ManagerController::class, 'updateEmployee'])->name('employees.update'); // Sửa
-        Route::delete('/employees/{id}', [ManagerController::class, 'deleteEmployee'])->name('employees.delete'); // Xóa
 
-        // Quản lý hồ sơ cá nhân
+        // 3. Xem hồ sơ & Bảng lương
         Route::get('/profile', [ManagerController::class, 'showProfile'])->name('profile');
-        Route::post('/profile', [ManagerController::class, 'updateProfile'])->name('profile.update');
-
-        // Bảng lương tổng hợp
         Route::get('/payroll', [ManagerController::class, 'payroll'])->name('payroll');
+
+
+        // ====================================================
+        // (Sẽ bị CHẶN nếu tài khoản có EndDate khác null)
+        // ====================================================
+        Route::middleware(['active.user'])->group(function () {
+            
+            // 1. Thao tác với Tuần làm việc (Tạo mới, Chốt lịch)
+            Route::post('/create-week', [ManagerController::class, 'createWeek'])->name('create_week');
+            Route::post('/submit-week', [ManagerController::class, 'submitWeek'])->name('submit_week');
+            
+            // 2. Thao tác Phân công (Gán, Xóa ca)
+            Route::post('/assign', [ManagerController::class, 'assignStaff'])->name('assign');
+            Route::delete('/delete-assignment/{id}', [ManagerController::class, 'deleteAssignment'])->name('delete_assignment');
+            Route::post('/manager/approve-assignment/{id}', [ManagerController::class, 'approveAssignment'])
+                ->name('approve_assignment');
+
+            // 3. Quản lý Nhân viên (Thêm, Sửa, Xóa)
+            Route::post('/employees', [ManagerController::class, 'storeEmployee'])->name('employees.store');
+            Route::put('/employees/{id}', [ManagerController::class, 'updateEmployee'])->name('employees.update');
+            Route::delete('/employees/{id}', [ManagerController::class, 'deleteEmployee'])->name('employees.delete');
+
+            // 4. Cập nhật hồ sơ cá nhân (Đổi tên, pass...)
+            Route::post('/profile', [ManagerController::class, 'updateProfile'])->name('profile.update');
+        });
+
     });
 
     // ----------------------------------------------------
     // GROUP B: STAFF (NHÂN VIÊN)
     // ----------------------------------------------------
     // Prefix URL: /staff/... | Prefix Name: staff....
+    // GROUP B: STAFF (NHÂN VIÊN)
     Route::prefix('staff')->name('staff.')->group(function () {
         
-        // Xem lịch cá nhân
+        // --- 1. CÁC ROUTE CHỈ XEM (Vẫn cho phép người nghỉ làm truy cập) ---
         Route::get('/dashboard', [StaffController::class, 'dashboard'])->name('dashboard');
-
-        // Đăng ký lịch rảnh
-        Route::get('/register', [StaffController::class, 'index'])->name('register'); // Form đăng ký
-        Route::post('/register', [StaffController::class, 'store'])->name('store');   // Lưu đăng ký
-
-        // HỒ SƠ CÁ NHÂN
-        Route::get('/profile', [StaffController::class, 'showProfile'])->name('profile');
-        Route::post('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
-
-        // BẢNG LƯƠNG
+        Route::get('/register', [StaffController::class, 'index'])->name('register'); // Xem form đăng ký
         Route::get('/payroll', [StaffController::class, 'payroll'])->name('payroll');
+        Route::get('/profile', [StaffController::class, 'showProfile'])->name('profile');
+
+
+        // --- 2. CÁC ROUTE THAO TÁC (Chặn người đã nghỉ làm) ---
+        Route::middleware(['active.user'])->group(function () {
+            
+            // Lưu đăng ký lịch
+            Route::post('/register', [StaffController::class, 'store'])->name('store');   
+            
+            // Xác nhận công (Tick)
+            Route::post('/confirm-assignment/{id}', [StaffController::class, 'confirmAssignment'])->name('confirm_assignment');
+            
+            // Đổi mật khẩu
+            Route::post('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
+        });
+
     });
-
-    // 1. Route cho Nhân viên xác nhận công (Tick)
-    Route::post('/staff/confirm-assignment/{id}', [StaffController::class, 'confirmAssignment'])
-        ->name('staff.confirm_assignment');
-
-    // 2. Route cho Quản lý duyệt công (Approve)
-    Route::post('/manager/approve-assignment/{id}', [ManagerController::class, 'approveAssignment'])
-        ->name('manager.approve_assignment');
 
 });

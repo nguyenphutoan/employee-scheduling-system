@@ -71,12 +71,17 @@
                             </div>
                         </div>
 
-                        {{-- Nút lưu --}}
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="reset" class="btn btn-secondary">Khôi phục</button>
-                            <button type="submit" class="btn btn-primary px-4 fw-bold">
-                                <i class="bi bi-save me-1"></i> Cập nhật hồ sơ
-                            </button>
+                            @if(!Auth::user()->EndDate)
+                                <button type="reset" class="btn btn-secondary">Khôi phục</button>
+                                <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                    <i class="bi bi-save me-1"></i> Cập nhật hồ sơ
+                                </button>
+                            @else
+                                <div class="alert alert-warning mb-0 py-1 px-3 d-flex align-items-center">
+                                    <i class="bi bi-lock-fill me-2"></i> Tài khoản đã ngưng hoạt động. Không thể chỉnh sửa.
+                                </div>
+                            @endif
                         </div>
                     </form>
                 </div>

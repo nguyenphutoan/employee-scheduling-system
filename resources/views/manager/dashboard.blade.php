@@ -5,7 +5,22 @@
 @section('content')
 <div class="container-fluid">
 
-    {{-- Header & Điều hướng --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-start border-danger border-4" role="alert">
+            <i class="bi bi-exclamation-octagon-fill me-2 fs-5 align-middle"></i>
+            <strong>Thất bại:</strong> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    {{-- 2. HEADER & ĐIỀU HƯỚNG --}}
     <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
         
         {{-- NÚT TUẦN TRƯỚC --}}
@@ -19,7 +34,7 @@
             @endif
         </div>
 
-        {{-- TIÊU ĐỀ & NGÀY THÁNG (Ở GIỮA) --}}
+        {{-- TIÊU ĐỀ & NGÀY THÁNG --}}
         <div class="text-center">
             <h4 class="mb-1 fw-bold text-uppercase text-primary">
                 <i class="bi bi-table"></i> Bảng tổng hợp lịch tuần
@@ -77,9 +92,8 @@
                                     {{-- Cột tên nhân viên --}}
                                     <td class="text-start ps-3 align-middle">
                                         <div class="fw-bold text-dark">{{ $user->FullName }}</div>
-                                        {{-- Thêm hiển thị Mã nhân viên (UserID) --}}
                                         <small class="text-muted" style="font-size: 0.8rem;">
-                                            Mã NV: #{{ $user->UserID }}
+                                            Mã NV: {{ $user->UserName }}
                                         </small>
                                     </td>
 
@@ -90,9 +104,7 @@
                                         @endphp
                                         <td class="{{ empty($cellContent) ? 'bg-light' : '' }}">
                                             @if(!empty($cellContent))
-                                                <span class="badge bg-info text-dark border border-primary-subtle p-2">
-                                                    {!! $cellContent !!}
-                                                </span>
+                                                {!! $cellContent !!}
                                             @endif
                                         </td>
                                     @endforeach
@@ -132,6 +144,8 @@
                             </tr>
                         </tfoot>
                     </table>
+
+                    {{-- CHÚ THÍCH TRẠNG THÁI --}}
                     <div class="mt-4 p-3 bg-white rounded shadow-sm no-print">
                         <h6 class="fw-bold">📌 Chú thích trạng thái:</h6>
                         <div class="d-flex gap-4">
@@ -172,7 +186,6 @@
             margin: 10mm;       
         }
 
-
         body {
             background: white;
             font-family: 'Times New Roman', serif; 
@@ -199,12 +212,10 @@
         }
     }
 </style>
-@endsection
 
 <script>
     function printSchedule() {
         // 1. Lấy ngày tháng để đặt tên
-        // Lưu ý: Tên file không được chứa dấu '/' nên ta dùng dấu '_' hoặc '-'
         @if(isset($currentWeek))
             var startDate = "{{ date('d-m', strtotime($currentWeek->StartDate)) }}";
             var endDate = "{{ date('d-m-y', strtotime($currentWeek->EndDate)) }}";
@@ -213,7 +224,7 @@
             var fileName = "LichTuan_Chung";
         @endif
 
-        // 2. Lưu tiêu đề cũ của trang web
+        // 2. Lưu tiêu đề cũ
         var oldTitle = document.title;
 
         // 3. Đổi tiêu đề trang (Trình duyệt sẽ dùng cái này làm tên file PDF)
@@ -222,9 +233,11 @@
         // 4. Gọi lệnh in
         window.print();
 
-        // 5. Trả lại tiêu đề cũ sau khi in xong (để không bị lỗi hiển thị tab)
+        // 5. Trả lại tiêu đề cũ
         setTimeout(() => {
             document.title = oldTitle;
         }, 1000);
     }
 </script>
+
+@endsection

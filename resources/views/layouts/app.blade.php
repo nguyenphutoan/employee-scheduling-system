@@ -155,6 +155,13 @@
         
     </div>
 
+    @if(Auth::check() && Auth::user()->EndDate)
+        <div class="alert alert-warning text-center m-0 rounded-0 fw-bold">
+            <i class="bi bi-exclamation-triangle"></i> 
+            Tài khoản này đã ngưng hoạt động (Nghỉ việc). Bạn chỉ có quyền xem dữ liệu.
+        </div>
+    @endif
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">

@@ -38,6 +38,7 @@ class ManagerController extends Controller
         $eveningShift = null;
         $availableStaffs = collect(); // Danh sách nhân viên rảnh
 
+
         if ($currentWeek) {
             $morningShift = Shift::where('WeekID', $currentWeek->WeekID)
                                  ->where('DayOfWeek', $dayOfWeek)
@@ -81,7 +82,7 @@ class ManagerController extends Controller
             'availableStaffs',
             'prevWeekDate', 
             'nextWeekDate',
-            'currentWeek'
+            'currentWeek',
         ));
     }
 
@@ -257,8 +258,16 @@ class ManagerController extends Controller
             ];
         }
 
-        // 3. Lấy TẤT CẢ nhân viên (để ai không làm cũng hiện tên)
-        $users = \App\Models\User::where('role', 'staff')->get();
+        // 3. Lấy nhân viên (không phải Manager) và còn hiệu lực trong tuần hiện tại
+        $users = \App\Models\User::where('Role', '!=', 'Manager') // Bỏ quản lý
+            ->where(function($q) use ($currentWeek) {
+                $q->whereNull('EndDate') // Trường hợp 1: Làm lâu dài (chưa có ngày nghỉ)
+                ->orWhere('EndDate', '>=', $currentWeek->StartDate); // Trường hợp 2: Có ngày nghỉ, nhưng nghỉ SAU khi tuần này bắt đầu
+            })
+            //Phải vào làm TRƯỚC khi tuần này kết thúc
+            ->where('StartDate', '<=', $currentWeek->EndDate) 
+            ->orderBy('FullName', 'asc')
+            ->get();
 
         // 4. Lấy tất cả phân công trong tuần này
         $assignments = \App\Models\WorkAssignment::whereHas('shift', function($q) use ($currentWeek) {
@@ -287,8 +296,6 @@ class ManagerController extends Controller
                     $endT = substr($assign->EndTime, 0, 5);
                    // 1. Lấy tên vị trí (Nếu có)
                     $posName = $assign->position->PositionName ?? '';
-
-                    $cellData[] = "<div>$startT - $endT</div><small class='text-dark opacity-75'>($posName)</small>";
 
                     // Cộng dồn giờ công
                     $t1 = \Carbon\Carbon::parse($assign->StartTime);
@@ -345,8 +352,8 @@ class ManagerController extends Controller
     // 1. Hiển thị danh sách nhân viên
     public function indexEmployees()
     {
-        // Lấy danh sách nhân viên (trừ admin/manager nếu muốn)
-        $users = \App\Models\User::where('role', '!=', 'admin')->get();
+        // Lấy danh sách nhân viên 
+        $users = \App\Models\User::all();
         
         // Lấy danh sách vị trí để hiện trong form thêm mới
         $positions = \App\Models\Position::all(); 
@@ -362,7 +369,7 @@ class ManagerController extends Controller
             'FullName' => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:6',
-            'role'     => 'required',
+            'Role'     => 'required',
             'StartDate'=> 'required|date',
         ]);
 
@@ -371,7 +378,7 @@ class ManagerController extends Controller
             'FullName' => $request->FullName,
             'email'    => $request->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-            'role'     => $request->role,
+            'Role'     => $request->Role,
             'StartDate'=> $request->StartDate,
             'EndDate'  => null,
         ]);
@@ -384,12 +391,16 @@ class ManagerController extends Controller
     {
         $user = \App\Models\User::findOrFail($id);
 
+        if ($user->Role == 'Manager') {
+            return back()->with('error', 'Bạn không có quyền chỉnh sửa thông tin của Quản lý khác!');
+        }
+
         $request->validate([
             // Check trùng UserName, nhưng trừ chính User đang sửa ra
             'UserName' => 'required|string|max:50|unique:users,UserName,'.$user->UserID.',UserID', 
             'FullName' => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email,'.$user->UserID.',UserID',
-            'role'     => 'required',
+            'Role'     => 'required',
             'StartDate'=> 'required|date',
             'EndDate'  => 'nullable|date|after_or_equal:StartDate',
         ]);
@@ -398,7 +409,7 @@ class ManagerController extends Controller
             'UserName' => $request->UserName, 
             'FullName' => $request->FullName,
             'email'    => $request->email,
-            'role'     => $request->role,
+            'Role'     => $request->Role,
             'StartDate'=> $request->StartDate,
             'EndDate'  => $request->EndDate,
         ];
@@ -420,6 +431,10 @@ class ManagerController extends Controller
         // Kiểm tra: Không cho xóa chính mình
         if ($user->UserID == auth()->id()) {
             return back()->with('error', 'Bạn không thể tự xóa chính mình!');
+        }
+
+        if ($user->Role == 'Manager') {
+            return back()->with('error', 'Bạn không thể xóa tài khoản Quản lý!');
         }
 
         $user->delete();
@@ -492,7 +507,7 @@ class ManagerController extends Controller
         $endDate = \Carbon\Carbon::createFromDate($year, $month, 20)->endOfDay();
         $startDate = $endDate->copy()->subMonth()->addDay()->startOfDay();
 
-        // 3. Lấy danh sách nhân viên (Trừ admin nếu muốn, hoặc lấy hết)
+        // 3. Lấy danh sách nhân viên 
         $users = \App\Models\User::all();
 
         $payrollData = [];

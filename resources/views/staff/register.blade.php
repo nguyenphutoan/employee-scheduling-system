@@ -123,9 +123,11 @@
                             </div>
 
                             <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg shadow">
-                                    💾 Lưu đăng ký
-                                </button>
+                                @if(!Auth::user()->EndDate)
+                                    <button type="submit" class="btn btn-primary btn-lg shadow">💾 Lưu đăng ký</button>
+                                @else
+                                    <div class="alert alert-danger text-center">Bạn không thể đăng ký lịch vì đã nghỉ làm.</div>
+                                @endif
                             </div>
                         </form>
                     @endif
