@@ -459,7 +459,7 @@ class ManagerController extends Controller
             'FullName' => 'required|string|max:100',
             'StartDate'=> 'required|date',
             'EndDate'  => 'nullable|date|after_or_equal:StartDate',
-            'Password' => 'nullable|min:6', // Mật khẩu không bắt buộc (nếu không đổi)
+            'password' => 'nullable|min:6', // Mật khẩu không bắt buộc (nếu không đổi)
             'Role'     => 'required|in:Staff,Manager'
         ]);
 
@@ -473,8 +473,8 @@ class ManagerController extends Controller
         ];
 
         // Nếu có nhập mật khẩu mới thì mới mã hóa và lưu
-        if ($request->filled('Password')) {
-            $data['Password'] = \Illuminate\Support\Facades\Hash::make($request->Password);
+        if ($request->filled('password')) {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($request->Password);
         }
 
         \App\Models\User::where('UserID', $user->UserID)->update($data);
