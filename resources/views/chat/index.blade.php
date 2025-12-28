@@ -34,7 +34,7 @@
                 </div>
             </div>
 
-            <div class="list-group list-group-flush overflow-auto flex-grow-1" id="user-list">
+            <div class="list-group list-group-flush overflow-auto flex-grow-1" id="user-list" style="min-height: 0;">
                 @foreach($users as $user)
                 <a href="#" class="list-group-item list-group-item-action user-item border-bottom-0" 
                    data-id="{{ $user->UserID }}" 
@@ -79,7 +79,7 @@
                 </h5>
             </div>
 
-            <div class="flex-grow-1 p-4 overflow-auto" id="chat-box" style="background-color: #f5f7fb;">
+            <div class="flex-grow-1 p-4 overflow-auto" id="chat-box" style="background-color: #f5f7fb; min-height: 0;">
                 </div>
 
             <div class="p-3 border-top bg-white d-none" id="input-area">
