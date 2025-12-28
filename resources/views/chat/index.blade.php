@@ -17,27 +17,22 @@
         background-color: #f8f9fa;
     }
     
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1; 
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #ccc; 
-        border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #aaa; 
-    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
+    /* MOBILE CHAT FIX */
     @media (max-width: 768px) {
+        /* Mặc định: Hiện danh sách, Ẩn box chat */
         #chat-col-right { display: none !important; }
         #chat-col-left { display: flex !important; width: 100%; }
 
+        /* Khi đang chat: Ẩn danh sách, Hiện box chat */
         .chat-active #chat-col-left { display: none !important; }
         .chat-active #chat-col-right { display: flex !important; width: 100%; }
         
+        /* Điều chỉnh chiều cao cho mobile */
         .chat-container { height: calc(100vh - 140px) !important; }
     }
 </style>
@@ -46,9 +41,18 @@
     <div id="chat-wrapper" class="row rounded-3 shadow-sm bg-white overflow-hidden chat-container" style="height: 85vh;">
         
         <div id="chat-col-left" class="col-md-3 border-end p-0 d-flex flex-column bg-white h-100">
+            
             <div class="p-3 border-bottom bg-white fw-bold text-primary flex-shrink-0">
                 <i class="bi bi-people-fill"></i> Danh bạ
             </div>
+
+            <div class="p-2 bg-light border-bottom flex-shrink-0">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="user-search" class="form-control border-start-0 ps-0" placeholder="Tìm tên hoặc tài khoản...">
+                </div>
+            </div>
+            
             <div class="list-group list-group-flush flex-grow-1" id="user-list" style="height: 0; min-height: 0; overflow-y: auto;">
                 @foreach($users as $user)
                 <a href="#" class="list-group-item list-group-item-action user-item border-bottom-0" 
@@ -70,6 +74,11 @@
                     </div>
                 </a>
                 @endforeach
+                
+                <div id="no-result" class="text-center p-4 text-muted d-none">
+                    <i class="bi bi-search display-6 mb-2"></i><br>
+                    Không tìm thấy ai.
+                </div>
             </div>
         </div>
 
@@ -81,11 +90,12 @@
                 </button>
                 
                 <h5 class="m-0 text-truncate" id="chat-header">
-                    <span class="text-muted fw-light">Chọn người để chat...</span>
+                    <span class="text-muted fw-light">Chọn một người để bắt đầu...</span>
                 </h5>
             </div>
 
-            <div class="flex-grow-1 p-4" id="chat-box" style="background-color: #f5f7fb; height: 0; min-height: 0; overflow-y: auto;"></div>
+            <div class="flex-grow-1 p-4" id="chat-box" style="background-color: #f5f7fb; height: 0; min-height: 0; overflow-y: auto;">
+            </div>
             
             <div class="p-2 p-md-3 border-top bg-white d-none flex-shrink-0" id="input-area">
                 <div class="input-group">
@@ -117,6 +127,7 @@
             if (!hasResult) $('#no-result').removeClass('d-none');
             else $('#no-result').addClass('d-none');
         });
+
 
         $('.user-item').click(function(e) {
             e.preventDefault();
