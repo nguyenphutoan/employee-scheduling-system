@@ -600,4 +600,45 @@ class ManagerController extends Controller
             'month', 'year', 'startDate', 'endDate'
         ));
     }
+
+    public function checkAvailabilityStatus($weekId)
+    {
+        // 1. Lấy thông tin tuần
+        $week = Week::find($weekId);
+        if (!$week) {
+            return response()->json(['error' => 'Tuần không tồn tại'], 404);
+        }
+
+        // 2. Lấy danh sách ID các nhân viên ĐÃ có dữ liệu đăng ký trong tuần này
+        $submittedUserIds = EmpAvailability::where('WeekID', $weekId)
+                                           ->pluck('UserID')
+                                           ->toArray();
+
+        // 3. Lấy TẤT CẢ nhân viên KHẢ DỤNG trong tuần đó
+        // Điều kiện: Không phải Manager AND (Vào làm <= Cuối tuần) AND (Chưa nghỉ OR Nghỉ >= Đầu tuần)
+        $eligibleEmployees = \App\Models\User::where('Role', '!=', 'Manager')
+            ->where('StartDate', '<=', $week->EndDate) // Vào làm trước khi tuần kết thúc
+            ->where(function($q) use ($week) {
+                $q->whereNull('EndDate') // Trường hợp 1: Còn làm mãi mãi (chưa có ngày nghỉ)
+                  ->orWhere('EndDate', '>=', $week->StartDate); // Trường hợp 2: Có ngày nghỉ, nhưng nghỉ SAU khi tuần bắt đầu
+            })
+            ->get(['UserID', 'FullName', 'email']);
+
+        // 4. Phân loại từ danh sách nhân viên khả dụng
+        // Nhóm ĐÃ đăng ký
+        $registered = $eligibleEmployees->filter(function ($user) use ($submittedUserIds) {
+            return in_array($user->UserID, $submittedUserIds);
+        })->values();
+
+        // Nhóm CHƯA đăng ký
+        $notRegistered = $eligibleEmployees->filter(function ($user) use ($submittedUserIds) {
+            return !in_array($user->UserID, $submittedUserIds);
+        })->values();
+
+        // 5. Trả về kết quả
+        return response()->json([
+            'registered' => $registered,
+            'not_registered' => $notRegistered
+        ]);
+    }
 }

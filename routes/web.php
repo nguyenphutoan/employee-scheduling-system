@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,11 @@ Route::middleware(['auth'])->group(function () {
     // Đăng xuất (Dùng POST để bảo mật tránh lỗi 419)
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    //Nhắn tin
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/messages/{userId}', [ChatController::class, 'fetchMessages']);
+    Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+
     // ----------------------------------------------------
     // GROUP A: MANAGER (QUẢN LÝ)
     // ----------------------------------------------------
@@ -51,6 +57,9 @@ Route::middleware(['auth'])->group(function () {
         // 3. Xem hồ sơ & Bảng lương
         Route::get('/profile', [ManagerController::class, 'showProfile'])->name('profile');
         Route::get('/payroll', [ManagerController::class, 'payroll'])->name('payroll');
+
+        Route::get('check-availability/{weekId}', [ManagerController::class, 'checkAvailabilityStatus'])
+            ->name('check_availability');
 
 
         // ====================================================

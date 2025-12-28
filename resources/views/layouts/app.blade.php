@@ -136,6 +136,23 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-chat-dots-fill me-2"></i>
+                                <span class="link-text">Nhắn tin nội bộ</span>
+                            </div>
+                            
+                            {{-- Hiển thị chấm đỏ nếu có tin nhắn mới --}}
+                            @if(isset($globalUnreadMsgCount) && $globalUnreadMsgCount > 0)
+                                <span class="badge bg-danger rounded-pill link-text" style="font-size: 0.7rem;">
+                                    {{ $globalUnreadMsgCount > 99 ? '99+' : $globalUnreadMsgCount }}
+                                </span>
+                                {{-- Chấm nhỏ khi sidebar thu gọn --}}
+                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none collapsed-dot"></span>
+                            @endif
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('manager.profile') }}" class="nav-link {{ request()->routeIs('manager.profile') ? 'active' : '' }}">
                             <i class="bi bi-person-circle me-2"></i>
                             <span class="link-text">Hồ sơ</span>
@@ -158,6 +175,23 @@
                         <a href="{{ route('staff.payroll') }}" class="nav-link {{ request()->routeIs('staff.payroll') ? 'active' : '' }}">
                             <i class="bi bi-cash-coin me-2"></i>
                             <span class="link-text">Bảng lương</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-chat-dots-fill me-2"></i>
+                                <span class="link-text">Nhắn tin nội bộ</span>
+                            </div>
+                            
+                            {{-- Hiển thị chấm đỏ nếu có tin nhắn mới --}}
+                            @if(isset($globalUnreadMsgCount) && $globalUnreadMsgCount > 0)
+                                <span class="badge bg-danger rounded-pill link-text" style="font-size: 0.7rem;">
+                                    {{ $globalUnreadMsgCount > 99 ? '99+' : $globalUnreadMsgCount }}
+                                </span>
+                                {{-- Chấm nhỏ khi sidebar thu gọn --}}
+                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none collapsed-dot"></span>
+                            @endif
                         </a>
                     </li>
                     <li class="nav-item">

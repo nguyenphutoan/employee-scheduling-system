@@ -57,14 +57,19 @@
     @if($morningShift && $eveningShift) 
 
         {{-- 2. THANH TAB CHỌN NGÀY TRONG TUẦN --}}
-        <ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm justify-content-center">
+        <ul class="nav nav-pills mb-4 bg-white p-3 rounded shadow-sm justify-content-center gap-2">
             @foreach($weekDates as $day)
-            <li class="nav-item mx-1">
-                <a class="nav-link {{ $day['isActive'] ? 'active' : '' }} text-center border" 
-                   href="{{ route('manager.scheduling', ['date' => $day['date']]) }}"
-                   style="min-width: 100px;">
-                    <div class="fw-bold">{{ $day['dayName'] }}</div>
-                    <small>{{ date('d/m', strtotime($day['date'])) }}</small>
+            <li class="nav-item">
+                <a class="nav-link {{ $day['isActive'] ? 'active shadow' : 'bg-light text-secondary border' }} d-flex flex-column align-items-center justify-content-center py-2 px-3" 
+                href="{{ route('manager.scheduling', ['date' => $day['date']]) }}"
+                style="min-width: 110px; min-height: 70px;">
+                    
+                    <div class="fw-bold fs-6 mb-1 text-uppercase">
+                        {{ $day['dayName'] }}
+                    </div>
+                    <div class="small {{ $day['isActive'] ? 'text-white-50' : 'text-muted' }}" style="font-size: 0.85rem;">
+                        {{ date('d/m', strtotime($day['date'])) }}
+                    </div>
                 </a>
             </li>
             @endforeach
@@ -82,6 +87,15 @@
             'title' => '🌙 CA TỐI', 
             'positions' => $positions
         ])
+
+        @if(isset($currentWeek))
+        <div class="mt-2">
+            <button type="button" class="btn btn-info btn-sm text-white rounded-pill px-3" 
+                    onclick="checkStatus({{ $currentWeek->WeekID }})">
+                <i class="bi bi-list-check"></i> Xem tiến độ đăng ký
+            </button>
+        </div>
+        @endif
 
     @else
         {{-- TRƯỜNG HỢP: CHƯA CÓ DỮ LIỆU TUẦN --}}
@@ -187,7 +201,41 @@
     </div>
 @endif
 
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">📋 Tình trạng đăng ký lịch tuần này</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h6 class="text-success fw-bold mb-3">
+                            ✅ Đã đăng ký (<span id="count-reg">0</span>)
+                        </h6>
+                        <ul class="list-group list-group-flush" id="list-registered" style="max-height: 400px; overflow-y: auto;">
+                            </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="text-danger fw-bold mb-3">
+                            ❌ Chưa đăng ký (<span id="count-not">0</span>)
+                        </h6>
+                        <ul class="list-group list-group-flush" id="list-not-registered" style="max-height: 400px; overflow-y: auto;">
+                            </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- 5. JAVASCRIPT XỬ LÝ --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
 <script>
     // Hàm mở Modal và reset form
     function openAssignModal(shiftId, posId, posName) {
@@ -250,5 +298,65 @@
             });
         });
     });
+
+    function checkStatus(weekId) {
+        // 1. Reset giao diện cũ
+        $('#list-registered').html('<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>');
+        $('#list-not-registered').html('<div class="text-center py-3"><div class="spinner-border text-danger"></div></div>');
+        
+        // 2. Hiện Modal trước
+        var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+        statusModal.show();
+
+        // 3. Gọi AJAX lấy dữ liệu
+        $.ajax({
+            url: '/manager/check-availability/' + weekId,
+            type: 'GET',
+            success: function(res) {
+                // Xử lý danh sách ĐÃ đăng ký
+                $('#list-registered').empty();
+                $('#count-reg').text(res.registered.length);
+                
+                if (res.registered.length > 0) {
+                    res.registered.forEach(user => {
+                        $('#list-registered').append(`
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${user.FullName}</strong><br>
+                                    <small class="text-muted">${user.email}</small>
+                                </div>
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            </li>
+                        `);
+                    });
+                } else {
+                    $('#list-registered').html('<li class="list-group-item text-muted text-center fst-italic">Chưa có ai đăng ký.</li>');
+                }
+
+                // Xử lý danh sách CHƯA đăng ký
+                $('#list-not-registered').empty();
+                $('#count-not').text(res.not_registered.length);
+
+                if (res.not_registered.length > 0) {
+                    res.not_registered.forEach(user => {
+                        $('#list-not-registered').append(`
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                                <div>
+                                    <strong>${user.FullName}</strong><br>
+                                    <small class="text-muted">${user.email}</small>
+                                </div>
+                                <i class="bi bi-hourglass-split text-danger"></i>
+                            </li>
+                        `);
+                    });
+                } else {
+                    $('#list-not-registered').html('<li class="list-group-item text-success text-center fw-bold">Tất cả nhân viên đã nộp lịch!</li>');
+                }
+            },
+            error: function() {
+                alert('Không thể tải dữ liệu. Vui lòng thử lại!');
+            }
+        });
+    }
 </script>
 @endsection

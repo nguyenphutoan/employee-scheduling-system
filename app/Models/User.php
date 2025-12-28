@@ -30,4 +30,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(EmpAvailability::class, 'UserID', 'UserID');
     }
+
+    public function messagesSent()
+    {
+        return $this->hasMany(Message::class, 'SenderID', 'UserID');
+    }
+
+    public function messagesReceived()
+    {
+        return $this->hasMany(Message::class, 'ReceiverID', 'UserID');
+    }
 }
