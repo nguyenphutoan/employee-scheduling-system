@@ -30,75 +30,67 @@
     ::-webkit-scrollbar-thumb:hover {
         background: #aaa; 
     }
+
+    @media (max-width: 768px) {
+        #chat-col-right { display: none !important; }
+        #chat-col-left { display: flex !important; width: 100%; }
+
+        .chat-active #chat-col-left { display: none !important; }
+        .chat-active #chat-col-right { display: flex !important; width: 100%; }
+        
+        .chat-container { height: calc(100vh - 140px) !important; }
+    }
 </style>
 
-<div class="container-fluid py-4">
-    <div class="row rounded-3 shadow-sm bg-white overflow-hidden" style="height: 85vh;">
+<div class="container-fluid py-0 py-md-4">
+    <div id="chat-wrapper" class="row rounded-3 shadow-sm bg-white overflow-hidden chat-container" style="height: 85vh;">
         
-        <div class="col-md-3 border-end p-0 d-flex flex-column bg-white h-100">
-            
+        <div id="chat-col-left" class="col-md-3 border-end p-0 d-flex flex-column bg-white h-100">
             <div class="p-3 border-bottom bg-white fw-bold text-primary flex-shrink-0">
-                <i class="bi bi-people-fill"></i> Danh bạ nhân viên
+                <i class="bi bi-people-fill"></i> Danh bạ
             </div>
-
-            <div class="p-2 bg-light border-bottom flex-shrink-0">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" id="user-search" class="form-control border-start-0 ps-0" placeholder="Tìm tên hoặc tài khoản...">
-                </div>
-            </div>
-
             <div class="list-group list-group-flush flex-grow-1" id="user-list" style="height: 0; min-height: 0; overflow-y: auto;">
                 @foreach($users as $user)
                 <a href="#" class="list-group-item list-group-item-action user-item border-bottom-0" 
                    data-id="{{ $user->UserID }}" 
-                   data-username="{{ $user->UserName }}">
-                   
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center w-100">
-                            <div class="bg-primary bg-opacity-10 text-primary fw-bold rounded-circle d-flex justify-content-center align-items-center me-3 position-relative flex-shrink-0" style="width: 45px; height: 45px;">
+                   data-username="{{ $user->UserName }}"
+                   onclick="openMobileChat()"> <div class="d-flex align-items-center w-100">
+                        <div class="bg-primary bg-opacity-10 text-primary fw-bold rounded-circle d-flex justify-content-center align-items-center me-3 position-relative flex-shrink-0" style="width: 45px; height: 45px;">
                                 {{ substr($user->FullName, 0, 1) }}
-                                
                                 @if($user->unread_count > 0)
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-unread border border-white">
                                     {{ $user->unread_count > 9 ? '9+' : $user->unread_count }}
                                 </span>
                                 @endif
-                            </div>
-                            
-                            <div class="overflow-hidden">
-                                <div class="fw-bold text-dark text-truncate">{{ $user->FullName }}</div>
-                                <div class="small text-muted d-flex justify-content-between">
-                                    <span>{{ $user->Role }}</span>
-                                </div>
-                            </div>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="fw-bold text-dark text-truncate">{{ $user->FullName }}</div>
+                            <div class="small text-muted">{{ $user->Role }}</div>
                         </div>
                     </div>
                 </a>
                 @endforeach
-                
-                <div id="no-result" class="text-center p-4 text-muted d-none">
-                    <i class="bi bi-search display-6 mb-2"></i><br>
-                    Không tìm thấy ai.
-                </div>
             </div>
         </div>
 
-        <div class="col-md-9 p-0 d-flex flex-column bg-white h-100">
+        <div id="chat-col-right" class="col-md-9 p-0 d-flex flex-column bg-white h-100">
             
             <div class="p-3 border-bottom bg-white d-flex align-items-center shadow-sm flex-shrink-0" style="height: 65px;">
+                <button class="btn btn-link text-dark p-0 me-3 d-md-none" onclick="closeMobileChat()">
+                    <i class="bi bi-arrow-left fs-2"></i>
+                </button>
+                
                 <h5 class="m-0 text-truncate" id="chat-header">
-                    <span class="text-muted fw-light">Chọn một người để bắt đầu...</span>
+                    <span class="text-muted fw-light">Chọn người để chat...</span>
                 </h5>
             </div>
 
-            <div class="flex-grow-1 p-4" id="chat-box" style="background-color: #f5f7fb; height: 0; min-height: 0; overflow-y: auto;">
-            </div>
-
-            <div class="p-3 border-top bg-white d-none flex-shrink-0" id="input-area">
+            <div class="flex-grow-1 p-4" id="chat-box" style="background-color: #f5f7fb; height: 0; min-height: 0; overflow-y: auto;"></div>
+            
+            <div class="p-2 p-md-3 border-top bg-white d-none flex-shrink-0" id="input-area">
                 <div class="input-group">
                     <input type="text" id="message-input" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off">
-                    <button class="btn btn-primary px-4" id="btn-send"><i class="bi bi-send-fill"></i> Gửi</button>
+                    <button class="btn btn-primary" id="btn-send"><i class="bi bi-send-fill"></i></button>
                 </div>
             </div>
         </div>
@@ -201,5 +193,17 @@
             if(receiverId) loadMessages();
         }, 3000);
     });
+
+    function openMobileChat() {
+        if (window.innerWidth < 768) {
+            document.getElementById('chat-wrapper').classList.add('chat-active');
+        }
+    }
+
+    function closeMobileChat() {
+        document.getElementById('chat-wrapper').classList.remove('chat-active');
+        $('.user-item').removeClass('active');
+        receiverId = null; 
+    }
 </script>
 @endsection

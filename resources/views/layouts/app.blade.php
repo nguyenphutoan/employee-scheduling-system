@@ -25,6 +25,7 @@
             transition: all 0.3s ease;
             overflow-x: hidden;
             white-space: nowrap;
+            z-index: 1000;
         }
 
         .sidebar.collapsed {
@@ -92,9 +93,72 @@
         .sidebar.collapsed .collapsed-dot {
             display: block !important;
         }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 5px; 
+            transition: all 0.2s ease-in-out; 
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.2); 
+            transform: translateX(5px); 
+        }
+
+        .nav-link.active {
+            color: var(--sidebar-bg) !important; 
+            background-color: #fff !important;  
+            font-weight: bold;                  
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            border-radius: 8px;                
+        }
+        
+        /* Chỉnh lại icon khi active để nó cùng màu với chữ */
+        .nav-link.active i {
+            color: var(--sidebar-bg) !important;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show-mobile {
+                left: 0;
+                width: 280px !important;
+            }
+
+            #mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+            }
+
+            #mobile-overlay.show {
+                display: block;
+            }
+            
+            #sidebarToggle { display: none; }
+        }
     </style>
 </head>
 <body>
+    <div id="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
     <div id="app" class="d-flex">
         
         @auth
@@ -142,17 +206,13 @@
                     <li class="nav-item">
                         <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} position-relative">
                             <i class="bi bi-chat-dots-fill me-2"></i>
-
                             <span class="link-text">Nhắn tin nội bộ</span>
                             
-                            {{-- Badge số lượng (Chỉ hiện khi mở rộng) --}}
                             @if(isset($globalUnreadMsgCount) && $globalUnreadMsgCount > 0)
-                                {{-- Dùng ms-auto để đẩy sang phải cùng, thêm link-text để ẩn khi thu gọn --}}
                                 <span class="badge bg-danger rounded-pill ms-auto link-text" style="font-size: 0.7rem;">
                                     {{ $globalUnreadMsgCount > 99 ? '99+' : $globalUnreadMsgCount }}
                                 </span>
 
-                                {{-- Chấm đỏ nhỏ (Chỉ hiện khi thu gọn) --}}
                                 <span class="position-absolute bg-danger border border-light rounded-circle collapsed-dot" 
                                     style="top: 8px; right: 10px; width: 10px; height: 10px; display: none;">
                                 </span>
@@ -187,17 +247,13 @@
                     <li class="nav-item">
                         <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} position-relative">
                             <i class="bi bi-chat-dots-fill me-2"></i>
-
                             <span class="link-text">Nhắn tin nội bộ</span>
                             
-                            {{-- Badge số lượng (Chỉ hiện khi mở rộng) --}}
                             @if(isset($globalUnreadMsgCount) && $globalUnreadMsgCount > 0)
-                                {{-- Dùng ms-auto để đẩy sang phải cùng, thêm link-text để ẩn khi thu gọn --}}
                                 <span class="badge bg-danger rounded-pill ms-auto link-text" style="font-size: 0.7rem;">
                                     {{ $globalUnreadMsgCount > 99 ? '99+' : $globalUnreadMsgCount }}
                                 </span>
 
-                                {{-- Chấm đỏ nhỏ (Chỉ hiện khi thu gọn) --}}
                                 <span class="position-absolute bg-danger border border-light rounded-circle collapsed-dot" 
                                     style="top: 8px; right: 10px; width: 10px; height: 10px; display: none;">
                                 </span>
@@ -235,13 +291,24 @@
         @endauth
 
         <main class="flex-grow-1" style="max-height: 100vh; overflow-y: auto;">
-            <nav class="navbar navbar-light bg-white shadow-sm d-md-none mb-3">
+            <nav class="navbar navbar-light bg-white shadow-sm d-md-none mb-3 sticky-top">
                 <div class="container-fluid">
-                    <span class="navbar-brand mb-0 h1">Scheduler</span>
+                    <button class="btn btn-link text-dark p-0 me-3" onclick="toggleMobileMenu()">
+                        <i class="bi bi-list fs-1"></i>
+                    </button>
+                    <span class="navbar-brand mb-0 h1 fw-bold text-primary">Scheduler</span>
+                    
+                    @auth
+                    <div class="flex-shrink-0">
+                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; font-size: 0.9rem;">
+                            {{ substr(Auth::user()->FullName, 0, 1) }}
+                        </div>
+                    </div>
+                    @endauth
                 </div>
             </nav>
 
-            <div class="p-4">
+            <div class="p-2 p-md-4">
                 @if(Auth::check() && Auth::user()->EndDate)
                     <div class="alert alert-warning text-center m-0 rounded-0 fw-bold mb-3">
                         <i class="bi bi-exclamation-triangle"></i> 
@@ -260,6 +327,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('show-mobile');
+            document.getElementById('mobile-overlay').classList.toggle('show');
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('sidebarToggle');

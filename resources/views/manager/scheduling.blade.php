@@ -57,23 +57,21 @@
     @if($morningShift && $eveningShift) 
 
         {{-- 2. THANH TAB CHỌN NGÀY TRONG TUẦN --}}
-        <ul class="nav nav-pills mb-4 bg-white p-3 rounded shadow-sm justify-content-center gap-2">
-            @foreach($weekDates as $day)
-            <li class="nav-item">
-                <a class="nav-link {{ $day['isActive'] ? 'active shadow' : 'bg-light text-secondary border' }} d-flex flex-column align-items-center justify-content-center py-2 px-3" 
-                href="{{ route('manager.scheduling', ['date' => $day['date']]) }}"
-                style="min-width: 110px; min-height: 70px;">
-                    
-                    <div class="fw-bold fs-6 mb-1 text-uppercase">
-                        {{ $day['dayName'] }}
-                    </div>
-                    <div class="small {{ $day['isActive'] ? 'text-white-50' : 'text-muted' }}" style="font-size: 0.85rem;">
-                        {{ date('d/m', strtotime($day['date'])) }}
-                    </div>
-                </a>
-            </li>
-            @endforeach
-        </ul>
+        <div class="overflow-auto pb-2 mb-3">
+            <ul class="nav nav-pills flex-nowrap bg-white p-2 rounded shadow-sm" style="min-width: max-content;">
+                @foreach($weekDates as $day)
+                <li class="nav-item mx-1">
+                    <a class="nav-link {{ $day['isActive'] ? 'active shadow' : 'bg-light text-dark border' }} text-center d-flex flex-column justify-content-center" 
+                       href="{{ route('manager.scheduling', ['date' => $day['date']]) }}"
+                       style="min-width: 100px; height: 70px;">
+                        
+                        <div class="fw-bold text-uppercase small">{{ $day['dayName'] }}</div>
+                        <div class="small mt-1">{{ date('d/m', strtotime($day['date'])) }}</div>
+                    </a>
+                </li>
+                @endforeach
+            </ul>
+        </div>
 
         {{-- 3. INCLUDE CÁC BẢNG XẾP LỊCH (Partial Views) --}}
         @include('manager.partials.shift_table', [

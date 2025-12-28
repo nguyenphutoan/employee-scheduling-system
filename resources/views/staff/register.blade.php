@@ -70,16 +70,13 @@
                             <input type="hidden" name="week_id" value="{{ $week->WeekID }}">
 
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th style="width: 20%">Ngày</th>
-                                            <th style="width: 35%">Rảnh từ (Giờ)</th>
-                                            <th style="width: 35%">Đến (Giờ)</th>
-                                            <th style="width: 10%">Trạng thái</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                               <table class="table table-hover align-middle" style="min-width: 600px;"> <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 25%">Ngày</th> <th style="width: 30%">Từ</th>
+                                        <th style="width: 30%">Đến</th>
+                                        <th style="width: 15%"></th>
+                                    </tr>
+                                </thead>
                                         @foreach($weekDays as $day)
                                             @php
                                                 $oldStart = $myAvailabilities[$day['code']]->AvailableFrom ?? '';
