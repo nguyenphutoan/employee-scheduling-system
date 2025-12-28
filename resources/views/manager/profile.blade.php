@@ -40,7 +40,7 @@
                         {{-- 2. Mật khẩu --}}
                         <div class="mb-3">
                             <label class="form-label fw-bold">Đổi mật khẩu</label>
-                            <input type="password" name="Password" class="form-control" placeholder="Để trống nếu không muốn thay đổi">
+                            <input type="password" name="password" class="form-control" placeholder="Để trống nếu không muốn thay đổi">
                         </div>
 
                         <hr class="my-4 text-muted">

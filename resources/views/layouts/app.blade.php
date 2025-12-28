@@ -88,6 +88,10 @@
             align-items: center;
             justify-content: center;
         }
+
+        .sidebar.collapsed .collapsed-dot {
+            display: block !important;
+        }
     </style>
 </head>
 <body>
@@ -136,19 +140,22 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-chat-dots-fill me-2"></i>
-                                <span class="link-text">Nhắn tin nội bộ</span>
-                            </div>
+                        <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} position-relative">
+                            <i class="bi bi-chat-dots-fill me-2"></i>
+
+                            <span class="link-text">Nhắn tin nội bộ</span>
                             
-                            {{-- Hiển thị chấm đỏ nếu có tin nhắn mới --}}
+                            {{-- Badge số lượng (Chỉ hiện khi mở rộng) --}}
                             @if(isset($globalUnreadMsgCount) && $globalUnreadMsgCount > 0)
-                                <span class="badge bg-danger rounded-pill link-text" style="font-size: 0.7rem;">
+                                {{-- Dùng ms-auto để đẩy sang phải cùng, thêm link-text để ẩn khi thu gọn --}}
+                                <span class="badge bg-danger rounded-pill ms-auto link-text" style="font-size: 0.7rem;">
                                     {{ $globalUnreadMsgCount > 99 ? '99+' : $globalUnreadMsgCount }}
                                 </span>
-                                {{-- Chấm nhỏ khi sidebar thu gọn --}}
-                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none collapsed-dot"></span>
+
+                                {{-- Chấm đỏ nhỏ (Chỉ hiện khi thu gọn) --}}
+                                <span class="position-absolute bg-danger border border-light rounded-circle collapsed-dot" 
+                                    style="top: 8px; right: 10px; width: 10px; height: 10px; display: none;">
+                                </span>
                             @endif
                         </a>
                     </li>
@@ -178,19 +185,22 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-chat-dots-fill me-2"></i>
-                                <span class="link-text">Nhắn tin nội bộ</span>
-                            </div>
+                        <a href="{{ route('chat.index') }}" class="nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }} position-relative">
+                            <i class="bi bi-chat-dots-fill me-2"></i>
+
+                            <span class="link-text">Nhắn tin nội bộ</span>
                             
-                            {{-- Hiển thị chấm đỏ nếu có tin nhắn mới --}}
+                            {{-- Badge số lượng (Chỉ hiện khi mở rộng) --}}
                             @if(isset($globalUnreadMsgCount) && $globalUnreadMsgCount > 0)
-                                <span class="badge bg-danger rounded-pill link-text" style="font-size: 0.7rem;">
+                                {{-- Dùng ms-auto để đẩy sang phải cùng, thêm link-text để ẩn khi thu gọn --}}
+                                <span class="badge bg-danger rounded-pill ms-auto link-text" style="font-size: 0.7rem;">
                                     {{ $globalUnreadMsgCount > 99 ? '99+' : $globalUnreadMsgCount }}
                                 </span>
-                                {{-- Chấm nhỏ khi sidebar thu gọn --}}
-                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none collapsed-dot"></span>
+
+                                {{-- Chấm đỏ nhỏ (Chỉ hiện khi thu gọn) --}}
+                                <span class="position-absolute bg-danger border border-light rounded-circle collapsed-dot" 
+                                    style="top: 8px; right: 10px; width: 10px; height: 10px; display: none;">
+                                </span>
                             @endif
                         </a>
                     </li>

@@ -474,7 +474,7 @@ class ManagerController extends Controller
 
         // Nếu có nhập mật khẩu mới thì mới mã hóa và lưu
         if ($request->filled('password')) {
-            $data['password'] = \Illuminate\Support\Facades\Hash::make($request->Password);
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
         }
 
         \App\Models\User::where('UserID', $user->UserID)->update($data);
