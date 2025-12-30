@@ -84,6 +84,9 @@ Route::middleware(['auth'])->group(function () {
 
             // 4. Cập nhật hồ sơ cá nhân (Đổi tên, pass...)
             Route::post('/profile', [ManagerController::class, 'updateProfile'])->name('profile.update');
+
+            //xuất file excel
+            Route::get('/export-schedule', [ManagerController::class, 'exportExcel'])->name('export_schedule');
         });
 
     });

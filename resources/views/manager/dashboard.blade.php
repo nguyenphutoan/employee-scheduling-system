@@ -58,6 +58,10 @@
                 <button class="btn btn-outline-secondary" disabled>Tuần tới &raquo;</button>
             @endif
 
+            <a href="{{ route('manager.export_schedule', ['week_id' => $currentWeek->WeekID ?? '']) }}" class="btn btn-success text-white">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+            </a>
+
             <button class="btn btn-secondary" onclick="printSchedule()" title="In bảng này">
                 <i class="bi bi-printer"></i> In Lịch
             </button>

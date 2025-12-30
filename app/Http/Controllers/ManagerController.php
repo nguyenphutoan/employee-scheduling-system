@@ -9,6 +9,8 @@ use App\Models\Position;
 use App\Models\EmpAvailability;
 use Carbon\Carbon;
 use App\Models\WorkAssignment;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ScheduleExport;
 
 class ManagerController extends Controller
 {
@@ -640,5 +642,27 @@ class ManagerController extends Controller
             'registered' => $registered,
             'not_registered' => $notRegistered
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $weekId = $request->get('week_id');
+        
+        // Nếu không có week_id, lấy tuần hiện tại giống logic dashboard
+        if (!$weekId) {
+            $currentWeek = Week::where('StartDate', '<=', now())
+                            ->where('EndDate', '>=', now())->first() 
+                            ?? Week::latest('StartDate')->first();
+            $weekId = $currentWeek->WeekID ?? null;
+        }
+
+        if (!$weekId) {
+            return back()->with('error', 'Không tìm thấy dữ liệu để xuất!');
+        }
+        
+        $week = Week::find($weekId);
+        $fileName = 'Lich_Lam_Viec_' . $week->StartDate . '.xlsx';
+
+        return Excel::download(new ScheduleExport($weekId), $fileName);
     }
 }
