@@ -8,7 +8,11 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     git \
-    && docker-php-ext-install pdo pdo_pgsql bcmath zip
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql bcmath zip gd
 
 # 2. Bật mod_rewrite
 RUN a2enmod rewrite
@@ -41,5 +45,4 @@ RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.c
 
 EXPOSE 80
 
-# Dòng này CÓ lệnh db:seed
 CMD php artisan migrate --force && apache2-foreground
