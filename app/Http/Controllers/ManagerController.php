@@ -501,32 +501,35 @@ class ManagerController extends Controller
     // --- QUẢN LÝ BẢNG LƯƠNG (PAYROLL) ---
     public function payroll(Request $request)
     {
-        // 1. Lấy tháng/năm từ request (Mặc định hiện tại)
         $month = $request->get('month', date('n'));
         $year = $request->get('year', date('Y'));
 
-        // 2. Xác định chu kỳ lương (21 tháng trước -> 20 tháng này)
         $endDate = \Carbon\Carbon::createFromDate($year, $month, 20)->endOfDay();
         $startDate = $endDate->copy()->subMonth()->addDay()->startOfDay();
 
-        // 3. Lấy danh sách nhân viên 
         $users = \App\Models\User::all();
 
         $payrollData = [];
         $grandTotalHours = 0;
         $grandTotalSalary = 0;
         $dayMap = ['Mon' => 0, 'Tue' => 1, 'Wed' => 2, 'Thu' => 3, 'Fri' => 4, 'Sat' => 5, 'Sun' => 6];
+        
+        // DANH SÁCH BOH
+        $bohPositions = ['Prep', 'Batter Fry']; 
 
         foreach ($users as $user) {
-            // Lấy lịch APPROVED của user này trong khoảng thời gian
-            // (Lấy rộng ra các tuần liên quan rồi lọc ngày sau)
             $assignments = \App\Models\WorkAssignment::where('UserID', $user->UserID)
-                ->where('Status', 'Approved') // Chỉ tính lịch đã duyệt
+                ->where('Status', 'Approved') 
                 ->with(['shift.week', 'position'])
                 ->get();
 
             $userTotalHours = 0;
             $userNightHours = 0;
+            
+            // BIẾN TÍNH TIỀN CÁ NHÂN
+            $userBaseSalary = 0;
+            $userNightAllowance = 0;
+            
             $details = [];
 
             foreach ($assignments as $assign) {
@@ -534,58 +537,65 @@ class ManagerController extends Controller
                 $dayOffset = $dayMap[$assign->shift->DayOfWeek] ?? 0;
                 $workDate = $weekStart->copy()->addDays($dayOffset);
 
-                // Chỉ xử lý nếu nằm trong chu kỳ lương
                 if ($workDate->between($startDate, $endDate)) {
                     
-                    // Tính giờ làm
+                    // Tính giờ
                     $t1 = \Carbon\Carbon::parse($assign->StartTime);
                     $t2 = \Carbon\Carbon::parse($assign->EndTime);
                     if ($t2->lt($t1)) $t2->addDay();
-                    
                     $hours = abs($t2->diffInMinutes($t1)) / 60;
 
-                    // Tính giờ đêm (Logic giống bên Staff)
+                    // Tính giờ đêm
                     $nightHours = 0;
                     $nightStart = \Carbon\Carbon::parse($assign->StartTime)->setTime(22, 0);
                     $nightEnd = $nightStart->copy()->addDay()->setTime(6, 0);
                     $earlyMorningStart = \Carbon\Carbon::parse($assign->StartTime)->setTime(0, 0);
                     $earlyMorningEnd = \Carbon\Carbon::parse($assign->StartTime)->setTime(6, 0);
 
-                    // Giao thoa 22h-6h sáng hôm sau
                     $overlapStart = max($t1->timestamp, $nightStart->timestamp);
                     $overlapEnd = min($t2->timestamp, $nightEnd->timestamp);
                     if ($overlapEnd > $overlapStart) $nightHours += ($overlapEnd - $overlapStart) / 3600;
 
-                    // Giao thoa 0h-6h sáng hôm nay
                     $overlapStart2 = max($t1->timestamp, $earlyMorningStart->timestamp);
                     $overlapEnd2 = min($t2->timestamp, $earlyMorningEnd->timestamp);
                     if ($overlapEnd2 > $overlapStart2) $nightHours += ($overlapEnd2 - $overlapStart2) / 3600;
 
-                    // Cộng dồn cá nhân
+                    // --- TÍNH TIỀN THEO VỊ TRÍ ---
+                    $posName = $assign->position->PositionName ?? '';
+                    $hourlyRate = 26000; // FOH mặc định
+
+                    foreach ($bohPositions as $boh) {
+                        if (strcasecmp(trim($posName), $boh) == 0) {
+                            $hourlyRate = 28000;
+                            break;
+                        }
+                    }
+
+                    // Cộng dồn
                     $userTotalHours += $hours;
                     $userNightHours += $nightHours;
+                    
+                    // Cộng tiền lương ca này
+                    $userBaseSalary += ($hours * $hourlyRate);
+                    $userNightAllowance += ($nightHours * $hourlyRate * 0.3);
 
-                    // Lưu chi tiết để hiện trong Modal
                     $details[] = [
                         'date' => $workDate->format('d/m/Y'),
                         'time' => substr($assign->StartTime, 0, 5) . ' - ' . substr($assign->EndTime, 0, 5),
-                        'position' => $assign->position->PositionName ?? '',
+                        'position' => $posName,
                         'hours' => $hours,
-                        'night' => $nightHours
+                        'night' => $nightHours,
+                        'rate' => $hourlyRate
                     ];
                 }
             }
 
-            // Tính lương cá nhân
-            $baseSalary = $userTotalHours * 25000;
-            $nightAllowance = $userNightHours * 25000 * 0.3;
-            $totalSalary = $baseSalary + $nightAllowance;
+            // TỔNG LƯƠNG CÁ NHÂN
+            $totalSalary = $userBaseSalary + $userNightAllowance;
 
-            // Cộng dồn tổng công ty
             $grandTotalHours += $userTotalHours;
             $grandTotalSalary += $totalSalary;
 
-            // Đẩy vào mảng dữ liệu nếu có làm việc (hoặc hiển thị cả người làm 0h tùy bạn)
             if($userTotalHours > 0 || count($details) > 0) {
                 $payrollData[] = (object) [
                     'user' => $user,

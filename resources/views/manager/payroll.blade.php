@@ -28,6 +28,7 @@
 
     {{-- 2. THỐNG KÊ TỔNG QUAN (CARDS) --}}
     <div class="row mb-4">
+        {{-- Tổng tiền --}}
         <div class="col-md-6 col-xl-4">
             <div class="card border-0 shadow-sm bg-primary text-white h-100">
                 <div class="card-body">
@@ -44,6 +45,7 @@
             </div>
         </div>
 
+        {{-- Tổng giờ --}}
         <div class="col-md-6 col-xl-4">
             <div class="card border-0 shadow-sm bg-white text-dark h-100">
                 <div class="card-body">
@@ -60,6 +62,7 @@
             </div>
         </div>
 
+        {{-- Thông tin chu kỳ --}}
         <div class="col-md-12 col-xl-4 mt-3 mt-xl-0">
              <div class="card border-0 shadow-sm bg-light h-100">
                 <div class="card-body d-flex flex-column justify-content-center">
@@ -72,7 +75,7 @@
                         đến <span class="fw-bold text-dark">{{ $endDate->format('d/m/Y') }}</span>
                     </div>
                     <small class="text-danger mt-2 fst-italic">
-                        * Chỉ tính các ca đã có trạng thái <b>Approved</b>.
+                        * Mức lương: <strong>FOH 26k/h</strong> - <strong>BOH 28k/h</strong>.
                     </small>
                 </div>
             </div>
@@ -133,33 +136,44 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body p-0">
-                                                <table class="table table-striped mb-0 text-start">
-                                                    <thead class="table-dark">
-                                                        <tr>
-                                                            <th class="ps-4">Ngày</th>
-                                                            <th>Ca làm</th>
-                                                            <th>Vị trí</th>
-                                                            <th class="text-center">Giờ làm</th>
-                                                            <th class="text-center">Đêm</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach($data->details as $item)
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped mb-0 text-start">
+                                                        <thead class="table-dark">
                                                             <tr>
-                                                                <td class="ps-4">{{ $item['date'] }}</td>
-                                                                <td>{{ $item['time'] }}</td>
-                                                                <td>{{ $item['position'] }}</td>
-                                                                <td class="text-center fw-bold">{{ number_format($item['hours'], 1) }}</td>
-                                                                <td class="text-center {{ $item['night'] > 0 ? 'text-primary fw-bold' : 'text-muted' }}">
-                                                                    {{ number_format($item['night'], 1) }}
-                                                                </td>
+                                                                <th class="ps-4">Ngày</th>
+                                                                <th>Ca làm</th>
+                                                                <th>Vị trí</th>
+                                                                <th>Đơn giá</th> {{-- Cột mới hiển thị mức lương --}}
+                                                                <th class="text-center">Giờ làm</th>
+                                                                <th class="text-center">Đêm</th>
                                                             </tr>
-                                                        @endforeach
-                                                        @if(count($data->details) == 0)
-                                                            <tr><td colspan="5" class="text-center">Không có dữ liệu approved</td></tr>
-                                                        @endif
-                                                    </tbody>
-                                                </table>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($data->details as $item)
+                                                                <tr>
+                                                                    <td class="ps-4">{{ $item['date'] }}</td>
+                                                                    <td>{{ $item['time'] }}</td>
+                                                                    <td>{{ $item['position'] }}</td>
+                                                                    <td>
+                                                                        {{-- Hiển thị Đơn giá --}}
+                                                                        @if(isset($item['rate']))
+                                                                            <span class="badge bg-light text-dark border">{{ number_format($item['rate']) }}</span>
+                                                                        @else
+                                                                            <span class="text-muted">-</span>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td class="text-center fw-bold">{{ number_format($item['hours'], 1) }}</td>
+                                                                    <td class="text-center {{ $item['night'] > 0 ? 'text-primary fw-bold' : 'text-muted' }}">
+                                                                        {{ number_format($item['night'], 1) }}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                            @if(count($data->details) == 0)
+                                                                <tr><td colspan="6" class="text-center">Không có dữ liệu approved</td></tr>
+                                                            @endif
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                             <div class="modal-footer bg-light d-flex justify-content-between">
                                                 <div class="small text-muted">
@@ -187,11 +201,19 @@
                 </tbody>
             </table>
         </div>
+        
+        {{-- 4. FOOTER: GHI CHÚ MIỄN TRỪ TRÁCH NHIỆM --}}
         <div class="card-footer bg-white py-3">
              <div class="alert alert-warning mb-0 border-0 bg-warning bg-opacity-10 small">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <strong>Lưu ý quan trọng:</strong> Bảng lương này được tính dựa trên số giờ công có trạng thái <b>Approved</b> và các công thức phụ cấp cơ bản (Đêm 30%). 
-                Số liệu này chỉ mang tính chất tham khảo (Ước tính). Số lương thực nhận cuối cùng (Net Salary) sau khi cộng thưởng, trừ phạt, BHXH, thuế... phải do bộ phận <b>Kế toán</b> quyết định.
+                <div class="d-flex">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                    <div>
+                        <strong>Lưu ý quan trọng:</strong> <br>
+                        1. Mức lương trên được tính theo đơn giá cơ bản từng vị trí (FOH: 26k, BOH: 28k) và phụ cấp đêm 30%. <br>
+                        2. Đây <b>CHƯA PHẢI LƯƠNG THỰC NHẬN CHÍNH THỨC</b>. Số liệu này chưa bao gồm: Phụ cấp giao hàng (Delivery), thưởng, và chưa trừ các khoản: BHXH, Đồng phục, Thuế TNCN... <br>
+                        3. Bảng lương chính thức và số tiền chuyển khoản cuối cùng sẽ do bộ phận <b>Kế toán</b> quyết định.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
