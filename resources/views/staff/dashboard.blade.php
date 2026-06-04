@@ -45,10 +45,10 @@
         <div class="alert alert-warning text-center">Chưa có dữ liệu lịch làm việc.</div>
     @else
 
-        {{-- 1. HEADER & ĐIỀU HƯỚNG (Căn chỉnh lại Flexbox cho Mobile) --}}
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
+        {{-- 1. HEADER & ĐIỀU HƯỚNG (Căn chỉnh lại Flexbox cho Mobile & PC) --}}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
             {{-- Nút tuần trước --}}
-            <div class="order-2 order-md-1 w-100 text-md-start">
+            <div class="order-2 order-md-1 text-md-start">
                 @if($prevWeek)
                     <a href="{{ route('staff.dashboard', ['week_id' => $prevWeek->WeekID]) }}" class="btn btn-outline-primary btn-responsive">
                         &laquo; Tuần trước
@@ -59,11 +59,11 @@
             </div>
 
             {{-- Tiêu đề giữa --}}
-            <div class="text-center order-1 order-md-2">
-                <h4 class="mb-0 fw-bold text-primary text-uppercase">
+            <div class="text-center order-1 order-md-2 flex-grow-1 px-2">
+                <h4 class="mb-0 fw-bold text-primary text-uppercase" style="white-space: nowrap;">
                     <i class="bi bi-calendar-check-fill me-2"></i> Lịch làm của tôi
                 </h4>
-                <div class="text-muted fw-bold mt-1">
+                <div class="text-muted fw-bold mt-1" style="white-space: nowrap;">
                     {{ date('d/m', strtotime($currentWeek->StartDate)) }} 
                     - 
                     {{ date('d/m', strtotime($currentWeek->EndDate)) }}
@@ -71,7 +71,7 @@
             </div>
 
             {{-- Nút tuần sau & Đăng ký --}}
-            <div class="order-3 order-md-3 w-100 text-md-end d-flex flex-column flex-md-row gap-2 justify-content-end">
+            <div class="order-3 order-md-3 text-md-end d-flex flex-column flex-md-row gap-2 justify-content-end">
                 <a href="register" class="btn btn-success btn-responsive">
                     <i class="bi bi-pencil-square"></i> Đăng ký
                 </a>

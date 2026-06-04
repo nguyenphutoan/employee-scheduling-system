@@ -47,21 +47,22 @@
     @endif
 
     {{-- 1. THANH ĐIỀU HƯỚNG TUẦN --}}
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
-        <div class="order-2 order-md-1 w-100 text-md-start">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
+        
+        <div class="order-2 order-md-1 text-md-start">
             <a href="{{ route('manager.scheduling', ['date' => $prevWeekDate]) }}" class="btn btn-outline-primary btn-responsive">
                 &laquo; Tuần trước
             </a>
         </div>
 
-        <div class="text-center order-1 order-md-2">
-            <h4 class="mb-0 fw-bold text-uppercase">Lịch làm việc</h4>
-            <span class="text-muted">
+        <div class="text-center order-1 order-md-2 flex-grow-1 px-2">
+            <h4 class="mb-0 fw-bold text-uppercase" style="white-space: nowrap;">Lịch làm việc</h4>
+            <span class="text-muted d-block mt-1" style="white-space: nowrap;">
                 Đang xem ngày: <strong class="text-primary">{{ date('d/m/Y', strtotime($selectedDate)) }}</strong>
             </span>
         </div>
 
-        <div class="order-3 order-md-3 w-100 text-md-end">
+        <div class="order-3 order-md-3 text-md-end">
             <a href="{{ route('manager.scheduling', ['date' => $nextWeekDate]) }}" class="btn btn-outline-primary btn-responsive">
                 Tuần tới &raquo;
             </a>

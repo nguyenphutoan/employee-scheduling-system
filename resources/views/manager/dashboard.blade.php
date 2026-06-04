@@ -81,10 +81,11 @@
     @endif
 
     {{-- 2. HEADER & ĐIỀU HƯỚNG --}}
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
+    {{-- 2. HEADER & ĐIỀU HƯỚNG --}}
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-stretch align-items-lg-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
         
         {{-- NÚT TUẦN TRƯỚC --}}
-        <div class="order-2 order-lg-1 w-100 text-lg-start">
+        <div class="order-2 order-lg-1 text-lg-start">
             @if(isset($prevWeek))
                 <a href="{{ route('manager.dashboard', ['week_id' => $prevWeek->WeekID]) }}" class="btn btn-outline-primary btn-responsive">
                     &laquo; Tuần trước
@@ -95,8 +96,8 @@
         </div>
 
         {{-- TIÊU ĐỀ & NGÀY THÁNG --}}
-        <div class="text-center order-1 order-lg-2">
-            <h4 class="mb-1 fw-bold text-uppercase text-primary">
+        <div class="text-center order-1 order-lg-2 flex-grow-1 px-2">
+            <h4 class="mb-1 fw-bold text-uppercase text-primary" style="white-space: nowrap;">
                 <i class="bi bi-table"></i> Bảng tổng hợp lịch tuần
             </h4>
             @if(isset($currentWeek))
@@ -109,7 +110,7 @@
         </div>
         
         {{-- NÚT TUẦN SAU & IN LỊCH --}}
-        <div class="d-flex flex-column flex-md-row gap-2 order-3 order-lg-3 w-100 justify-content-lg-end">
+        <div class="d-flex flex-column flex-md-row gap-2 order-3 order-lg-3 justify-content-md-end">
             @if(isset($nextWeek))
                 <a href="{{ route('manager.dashboard', ['week_id' => $nextWeek->WeekID]) }}" class="btn btn-outline-primary btn-responsive">
                     Tuần tới &raquo;

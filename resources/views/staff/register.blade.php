@@ -82,18 +82,17 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             
-            {{-- Đã căn chỉnh lại thanh điều hướng tuần cho Mobile --}}
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
-                <div class="order-2 order-md-1 w-100 text-md-start text-center">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
+                <div class="order-2 order-md-1 text-md-start text-center">
                     <a href="{{ route('staff.register', ['date' => \Carbon\Carbon::parse($date)->subWeek()->format('Y-m-d')]) }}" class="btn btn-outline-secondary btn-responsive">&laquo; Tuần trước</a>
                 </div>
                 
-                <div class="text-center order-1 order-md-2">
-                    <h4 class="mb-0 fw-bold text-uppercase text-primary">Đăng ký lịch làm</h4>
-                    <span class="text-muted d-block mt-1">Từ {{ $weekDays[0]['date'] }} đến {{ $weekDays[6]['date'] }}</span>
+                <div class="text-center order-1 order-md-2 flex-grow-1 px-2">
+                    <h4 class="mb-0 fw-bold text-uppercase text-primary" style="white-space: nowrap;">Đăng ký lịch làm</h4>
+                    <span class="text-muted d-block mt-1" style="white-space: nowrap;">Từ {{ $weekDays[0]['date'] }} đến {{ $weekDays[6]['date'] }}</span>
                 </div>
 
-                <div class="order-3 order-md-3 w-100 text-md-end text-center">
+                <div class="order-3 order-md-3 text-md-end text-center">
                     <a href="{{ route('staff.register', ['date' => \Carbon\Carbon::parse($date)->addWeek()->format('Y-m-d')]) }}" class="btn btn-outline-primary btn-responsive">Tuần sau &raquo;</a>
                 </div>
             </div>
