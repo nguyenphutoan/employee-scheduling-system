@@ -1,48 +1,39 @@
-# Sử dụng PHP 8.2 với Apache
 FROM php:8.2-apache
 
-# 1. Cài đặt thư viện
+# Cài đặt các thư viện hệ thống cần thiết cho Laravel
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    libzip-dev \
-    zip \
-    unzip \
     git \
+    curl \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_pgsql bcmath zip gd
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip
 
-# 2. Bật mod_rewrite
+# Cài đặt các extension PHP
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Bật Apache Rewrite Module 
 RUN a2enmod rewrite
 
-# 3. Cài Composer
+# Cài đặt Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 4. Thiết lập thư mục làm việc
+# Chuyển vào thư mục gốc của app
 WORKDIR /var/www/html
 
-# 5. Copy code
-COPY . .
+# Copy toàn bộ code vào trong container
+COPY . /var/www/html
 
-# 6. Cài gói thư viện
+# Tải các thư viện Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# 7. Phân quyền
+# Đổi thư mục gốc của Apache trỏ vào thư mục public của Laravel
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Cấp quyền đọc ghi cho thư mục storage
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 8. CẤU HÌNH APACHE =================================
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-
-# Đổi thư mục gốc về /public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
-
-# Cho phép Apache đọc file .htaccess để Laravel điều hướng URL
-RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf
-# =======================================================================
-
 EXPOSE 80
-
-CMD php artisan migrate --force && apache2-foreground

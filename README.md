@@ -1,59 +1,115 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# EmpScheduleLaravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel-based employee scheduling application for manager and staff workflow.
 
-## About Laravel
+## Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+This project provides a schedule management system including:
+- Role-based login for managers and staff.
+- Weekly shift scheduling with morning/evening assignments.
+- Employee availability submission and status tracking.
+- Manager dashboard, employee management, and payroll overview.
+- In-app chat between authenticated users.
+- Excel schedule export using `maatwebsite/excel`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Manager functions:
+  - View manager dashboard and weekly schedule.
+  - Create new weeks with morning/evening shifts.
+  - Assign staff to shifts and approve assignments.
+  - Track availability and employee registration status.
+  - Export schedule to `.xlsx`.
 
-## Learning Laravel
+- Staff functions:
+  - View individual dashboard and payroll summary.
+  - Register availability for upcoming weeks.
+  - Confirm assignment notifications.
+  - Update personal profile.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- Shared features:
+  - Authentication and session handling.
+  - Real-time-style messaging via chat routes.
+  - Structured data models for weeks, shifts, positions, assignments, and availability.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech Stack
 
-## Laravel Sponsors
+- PHP 8.2
+- Laravel 12
+- Tailwind CSS + Vite
+- Maatwebsite Excel for exports
+- SQLite or database driver configured in `.env`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Installation
 
-### Premium Partners
+1. Clone the repository.
+2. Copy the environment file:
+   ```bash
+   copy .env.example .env
+   ```
+3. Install PHP dependencies:
+   ```bash
+   composer install
+   ```
+4. Generate application key:
+   ```bash
+   php artisan key:generate
+   ```
+5. Run database migrations:
+   ```bash
+   php artisan migrate
+   ```
+6. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+7. Build assets or start development server:
+   ```bash
+   npm run dev
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Quick Setup
 
-## Contributing
+A single setup command is available:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer run setup
+```
 
-## Code of Conduct
+This will install dependencies, create `.env`, generate the app key, run migrations, install npm packages, and build assets.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Running the Application
 
-## Security Vulnerabilities
+Start the Laravel development server:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan serve
+```
+
+Then open the local URL shown in the terminal.
+
+## Testing
+
+Run the PHPUnit test suite with:
+
+```bash
+composer test
+```
+
+## Project Structure
+
+- `app/Http/Controllers` – Controller logic for auth, manager, staff, and chat.
+- `app/Exports` – Excel export implementation.
+- `app/Models` – Eloquent models for users, weeks, shifts, availability, positions, assignments, and messages.
+- `database/migrations` – Database schema for users, weeks, shifts, availability, positions, assignments, and messages.
+- `resources/views` – Blade templates for login, manager, staff, chat, and exports.
+- `routes/web.php` – Web routes for authentication, manager, staff, and chat flows.
+
+## Notes
+
+- The app includes a manager and staff role flow.
+- Use `.env` to configure database connection, mail, and other environment settings.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open source and uses the MIT license.
