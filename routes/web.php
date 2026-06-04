@@ -121,3 +121,17 @@ Route::middleware(['auth'])->group(function () {
     });
 
 });
+
+Route::get('/setup-db', function () {
+    try {
+        // Chạy lệnh tạo bảng
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        
+        // Chạy lệnh nạp dữ liệu mẫu
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        
+        return 'Database đã được tạo cấu trúc và nạp dữ liệu mẫu thành công!';
+    } catch (\Exception $e) {
+        return 'Lỗi: ' . $e->getMessage();
+    }
+});
