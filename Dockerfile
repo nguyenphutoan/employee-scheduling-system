@@ -1,19 +1,20 @@
 FROM php:8.2-apache
 
-# Cài đặt các thư viện hệ thống cần thiết cho Laravel
+# Cài đặt các thư viện hệ thống cần thiết 
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
     zip \
     unzip
 
-# Cài đặt các extension PHP
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Cài đặt các extension PHP 
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Bật Apache Rewrite Module 
+# Bật Apache Rewrite Module
 RUN a2enmod rewrite
 
 # Cài đặt Composer
