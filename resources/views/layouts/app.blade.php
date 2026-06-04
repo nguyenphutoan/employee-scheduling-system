@@ -58,13 +58,11 @@
 
         #sidebarToggle { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
 
-        /* --- TỐI ƯU HÓA MOBILE MENU --- */
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
                 top: 0;
                 left: -300px;
-                /* Sử dụng dvh để không bị lỗi chiều cao bởi thanh địa chỉ trình duyệt */
                 height: 100dvh; 
                 min-height: 100dvh;
                 transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -80,7 +78,6 @@
             #sidebarToggle { display: none; }
         }
 
-        /* Tùy chỉnh thanh cuộn cho khu vực nội dung chính */
         main::-webkit-scrollbar { width: 6px; }
         main::-webkit-scrollbar-track { background: transparent; }
         main::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
@@ -96,19 +93,17 @@
         <div class="d-flex flex-column flex-shrink-0 p-3 text-white sidebar" id="sidebar">
             
             <div class="header-bar d-flex align-items-center justify-content-between mb-4 mb-md-0 me-md-auto text-white text-decoration-none w-100">
-                <a href="/" class="d-flex align-items-center text-white text-decoration-none brand-link">
+                <a href="#" onclick="event.preventDefault(); window.innerWidth <= 768 ? toggleMobileMenu() : document.getElementById('sidebarToggle').click();" class="d-flex align-items-center text-white text-decoration-none brand-link" style="cursor: pointer;">
                     <div class="bg-white text-primary rounded d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px;">
                         <i class="bi bi-clock-fill fs-5"></i>
                     </div>
                     <span class="fs-4 fw-bold brand-text">Scheduler</span>
                 </a>
 
-                {{-- Nút thu gọn trên PC --}}
                 <button id="sidebarToggle" class="d-none d-md-flex">
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 
-                {{-- Nút đóng Menu trên Mobile --}}
                 <button class="btn btn-link text-white d-md-none p-0" onclick="toggleMobileMenu()">
                     <i class="bi bi-x-lg fs-3"></i>
                 </button>
@@ -212,10 +207,8 @@
         </div>
         @endauth
 
-        {{-- Sửa vh thành dvh để fix lỗi thanh cuộn trên điện thoại --}}
         <main class="flex-grow-1" style="height: 100dvh; max-height: 100dvh; overflow-y: auto; overflow-x: hidden;">
             
-            {{-- THANH ĐIỀU HƯỚNG TRÊN MOBILE CHUẨN APP --}}
             <nav class="navbar navbar-light bg-white shadow-sm d-md-none sticky-top border-bottom">
                 <div class="container-fluid px-3 py-1">
                     <div class="d-flex align-items-center">
@@ -227,7 +220,6 @@
                     
                     @auth
                     <div class="d-flex align-items-center gap-3">
-                        {{-- ICON CHAT HIỂN THỊ TRỰC TIẾP TRÊN NAVBAR ĐIỆN THOẠI --}}
                         <a href="{{ route('chat.index') }}" class="position-relative text-dark text-decoration-none">
                             <i class="bi bi-chat-dots fs-3"></i>
                             @if(isset($globalUnreadMsgCount) && $globalUnreadMsgCount > 0)
