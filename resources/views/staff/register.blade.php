@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container">
-    {{-- 1. THÊM THƯ VIỆN FLATPICKR --}}
+    {{-- 1. THÊM THƯ VIỆN FLATPICKR VÀ CUSTOM CSS RESPONSIVE --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
@@ -12,20 +12,90 @@
             background-color: #fff !important;
             cursor: pointer;
         }
+
+        /* Tùy chỉnh chiều rộng nút bấm cho responsive */
+        .btn-responsive { width: 100%; }
+        @media (min-width: 768px) {
+            .btn-responsive { width: auto; }
+        }
+
+        /* --- CSS BIẾN BẢNG THÀNH DẠNG CARD TRÊN MOBILE --- */
+        @media (max-width: 767px) {
+            .table-mobile-responsive thead { 
+                display: none; 
+            }
+            .table-mobile-responsive tbody, 
+            .table-mobile-responsive tr, 
+            .table-mobile-responsive td { 
+                display: block; 
+                width: 100%; 
+            }
+            .table-mobile-responsive tr { 
+                margin-bottom: 1rem; 
+                border: 1px solid #dee2e6; 
+                border-radius: 0.5rem; 
+                padding: 0.5rem; 
+                background-color: #fff;
+                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            }
+            .table-mobile-responsive tr.table-success {
+                background-color: #d1e7dd !important;
+                border-color: #badbcc;
+            }
+            .table-mobile-responsive td { 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: none; 
+                padding: 0.5rem;
+            }
+            /* Gắn nhãn cho các ô trên mobile */
+            .table-mobile-responsive td::before { 
+                content: attr(data-label); 
+                font-weight: bold; 
+                width: 25%; 
+                color: #495057;
+            }
+            /* Ô Ngày/Tháng (Header của Card) */
+            .table-mobile-responsive td:first-child { 
+                justify-content: center; 
+                text-align: center; 
+                background-color: #f8f9fa; 
+                border-radius: 0.5rem; 
+                margin-bottom: 0.5rem;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 0.75rem;
+            }
+            .table-mobile-responsive tr.table-success td:first-child {
+                background-color: #c3ebd7;
+            }
+            .table-mobile-responsive td:first-child::before { display: none; }
+            .table-mobile-responsive td:first-child span { font-size: 1.1rem; }
+            
+            /* Ô Input và Nút xóa */
+            .table-mobile-responsive td input { width: 70%; }
+            .table-mobile-responsive td:last-child { justify-content: flex-end; padding-top: 0; }
+            .table-mobile-responsive td:last-child::before { display: none; }
+        }
     </style>
 
     <div class="row justify-content-center">
         <div class="col-md-10">
             
-            <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
-                <a href="{{ route('staff.register', ['date' => \Carbon\Carbon::parse($date)->subWeek()->format('Y-m-d')]) }}" class="btn btn-outline-secondary">&laquo; Tuần trước</a>
+            {{-- Đã căn chỉnh lại thanh điều hướng tuần cho Mobile --}}
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
+                <div class="order-2 order-md-1 w-100 text-md-start text-center">
+                    <a href="{{ route('staff.register', ['date' => \Carbon\Carbon::parse($date)->subWeek()->format('Y-m-d')]) }}" class="btn btn-outline-secondary btn-responsive">&laquo; Tuần trước</a>
+                </div>
                 
-                <div class="text-center">
+                <div class="text-center order-1 order-md-2">
                     <h4 class="mb-0 fw-bold text-uppercase text-primary">Đăng ký lịch làm</h4>
-                    <span class="text-muted">Tuần từ {{ $weekDays[0]['date'] }} đến {{ $weekDays[6]['date'] }}</span>
+                    <span class="text-muted d-block mt-1">Từ {{ $weekDays[0]['date'] }} đến {{ $weekDays[6]['date'] }}</span>
                 </div>
 
-                <a href="{{ route('staff.register', ['date' => \Carbon\Carbon::parse($date)->addWeek()->format('Y-m-d')]) }}" class="btn btn-outline-primary">Tuần sau &raquo;</a>
+                <div class="order-3 order-md-3 w-100 text-md-end text-center">
+                    <a href="{{ route('staff.register', ['date' => \Carbon\Carbon::parse($date)->addWeek()->format('Y-m-d')]) }}" class="btn btn-outline-primary btn-responsive">Tuần sau &raquo;</a>
+                </div>
             </div>
 
             @if(session('success'))
@@ -69,14 +139,18 @@
                             @csrf
                             <input type="hidden" name="week_id" value="{{ $week->WeekID }}">
 
-                            <div class="table-responsive">
-                               <table class="table table-hover align-middle" style="min-width: 600px;"> <thead class="table-light">
-                                    <tr>
-                                        <th style="width: 25%">Ngày</th> <th style="width: 30%">Từ</th>
-                                        <th style="width: 30%">Đến</th>
-                                        <th style="width: 15%"></th>
-                                    </tr>
-                                </thead>
+                            {{-- Bỏ min-width và thêm class table-mobile-responsive --}}
+                            <div class="table-responsive border-0">
+                               <table class="table table-hover align-middle table-mobile-responsive"> 
+                                   <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 25%">Ngày</th> 
+                                            <th style="width: 30%">Từ</th>
+                                            <th style="width: 30%">Đến</th>
+                                            <th style="width: 15%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         @foreach($weekDays as $day)
                                             @php
                                                 $oldStart = $myAvailabilities[$day['code']]->AvailableFrom ?? '';
@@ -91,14 +165,14 @@
                                                     <span class="fw-bold">{{ $day['name'] }}</span><br>
                                                     <small class="text-muted">{{ $day['date'] }}</small>
                                                 </td>
-                                                <td>
-                                                    {{-- 2. ĐỔI TYPE="TIME" THÀNH TYPE="TEXT" VÀ THÊM CLASS time-picker --}}
+                                                {{-- Thêm data-label để hiển thị chữ trên Mobile --}}
+                                                <td data-label="Từ:">
                                                     <input type="text" class="form-control time-picker" 
                                                         name="availability[{{ $day['code'] }}][start]" 
                                                         value="{{ $oldStart }}"
                                                         placeholder="00:00">
                                                 </td>
-                                                <td>
+                                                <td data-label="Đến:">
                                                     <input type="text" class="form-control time-picker" 
                                                         name="availability[{{ $day['code'] }}][end]" 
                                                         value="{{ $oldEnd }}"
@@ -106,11 +180,11 @@
                                                 </td>
                                                 <td class="text-center">
                                                     @if($isRegistered)
-                                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearRow('{{ $day['code'] }}')" title="Xóa đăng ký ngày này">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="clearRow('{{ $day['code'] }}')" title="Xóa đăng ký ngày này">
                                                             <i class="bi bi-trash"></i> Xóa
                                                         </button>
                                                     @else
-                                                        <span class="text-muted small">--</span>
+                                                        <span class="text-muted small d-none d-md-inline">--</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -147,20 +221,16 @@
 
     function clearRow(dayCode) {
         if(confirm('Bạn muốn hủy đăng ký ngày này? (Nhớ bấm LƯU để áp dụng)')) {
-            // 1. Tìm dòng tương ứng
             let row = document.getElementById('row-' + dayCode);
             
-            // 2. Xóa giá trị trong 2 ô input (Sửa selector cho đúng class)
             let inputs = row.querySelectorAll('input.time-picker');
             inputs.forEach(input => {
                 input._flatpickr.clear(); 
                 input.value = '';       
             });
 
-            // 3. Đổi màu dòng về bình thường
             row.classList.remove('table-success');
             
-            // 4. Ẩn nút Xóa đi
             let btn = row.querySelector('button');
             if(btn) btn.style.display = 'none';
         }

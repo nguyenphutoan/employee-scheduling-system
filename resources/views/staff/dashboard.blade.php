@@ -5,23 +5,61 @@
 @section('content')
 <div class="container-fluid">
 
+    {{-- CSS RESPONSIVE CHO GIAO DIỆN LỊCH --}}
+    <style>
+        /* Nút full width trên mobile */
+        .btn-responsive { width: 100%; }
+        @media (min-width: 768px) {
+            .btn-responsive { width: auto; }
+            .table-calendar { min-width: 800px; } /* Giữ độ rộng tối thiểu trên PC */
+            .desktop-cell { height: 150px; background-color: #f8f9fa; }
+        }
+
+        /* Biến bảng thành danh sách dạng Card trên Mobile */
+        @media (max-width: 767px) {
+            .table-calendar thead { display: none; } /* Ẩn tiêu đề ngang */
+            .table-calendar tbody, 
+            .table-calendar tfoot, 
+            .table-calendar tr, 
+            .table-calendar td {
+                display: block;
+                width: 100%;
+            }
+            .table-calendar td {
+                height: auto !important; /* Hủy fixed height 150px */
+                border: none;
+                border-bottom: 5px solid #e9ecef; /* Tạo dải ngăn cách giữa các ngày */
+                padding: 1rem !important;
+                background-color: #fff !important;
+                text-align: left !important;
+            }
+            .table-calendar tfoot td {
+                border-bottom: none;
+                text-align: center !important;
+                background-color: #f8f9fa !important;
+            }
+        }
+    </style>
+
     @if(isset($noData))
         <div class="alert alert-warning text-center">Chưa có dữ liệu lịch làm việc.</div>
     @else
 
-        {{-- 1. HEADER & ĐIỀU HƯỚNG --}}
-        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+        {{-- 1. HEADER & ĐIỀU HƯỚNG (Căn chỉnh lại Flexbox cho Mobile) --}}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm gap-3">
             {{-- Nút tuần trước --}}
-            @if($prevWeek)
-                <a href="{{ route('staff.dashboard', ['week_id' => $prevWeek->WeekID]) }}" class="btn btn-outline-primary">
-                    &laquo; Tuần trước
-                </a>
-            @else
-                <button class="btn btn-outline-secondary" disabled>&laquo;</button>
-            @endif
+            <div class="order-2 order-md-1 w-100 text-md-start">
+                @if($prevWeek)
+                    <a href="{{ route('staff.dashboard', ['week_id' => $prevWeek->WeekID]) }}" class="btn btn-outline-primary btn-responsive">
+                        &laquo; Tuần trước
+                    </a>
+                @else
+                    <button class="btn btn-outline-secondary btn-responsive" disabled>&laquo; Tuần trước</button>
+                @endif
+            </div>
 
             {{-- Tiêu đề giữa --}}
-            <div class="text-center">
+            <div class="text-center order-1 order-md-2">
                 <h4 class="mb-0 fw-bold text-primary text-uppercase">
                     <i class="bi bi-calendar-check-fill me-2"></i> Lịch làm của tôi
                 </h4>
@@ -32,29 +70,29 @@
                 </div>
             </div>
 
-            {{-- Nút tuần sau --}}
-            <div class="d-flex gap-2">
+            {{-- Nút tuần sau & Đăng ký --}}
+            <div class="order-3 order-md-3 w-100 text-md-end d-flex flex-column flex-md-row gap-2 justify-content-end">
+                <a href="register" class="btn btn-success btn-responsive">
+                    <i class="bi bi-pencil-square"></i> Đăng ký
+                </a>
+                
                 @if($nextWeek)
-                    <a href="{{ route('staff.dashboard', ['week_id' => $nextWeek->WeekID]) }}" class="btn btn-outline-primary">
+                    <a href="{{ route('staff.dashboard', ['week_id' => $nextWeek->WeekID]) }}" class="btn btn-outline-primary btn-responsive">
                         Tuần tới &raquo;
                     </a>
                 @else
-                    <button class="btn btn-outline-secondary" disabled>&raquo;</button>
+                    <button class="btn btn-outline-secondary btn-responsive" disabled>Tuần tới &raquo;</button>
                 @endif
-                
-                {{-- Nút đăng ký lịch (Giữ lại nút cũ của bạn) --}}
-                <a href="register" class="btn btn-success">
-                    <i class="bi bi-pencil-square"></i> Đăng ký
-                </a>
             </div>
         </div>
 
-        {{-- 2. BẢNG LỊCH (Responsive: Trên mobile sẽ cuộn ngang) --}}
+        {{-- 2. BẢNG LỊCH --}}
         <div class="card border-0 shadow-sm">
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-bordered align-top text-center mb-0" style="min-width: 800px;">
-                        {{-- TIÊU ĐỀ CỘT: THỨ / NGÀY --}}
+                {{-- Bỏ min-width inline, thay bằng class table-calendar --}}
+                <div class="table-responsive border-0">
+                    <table class="table table-bordered align-top text-center mb-0 table-calendar">
+                        {{-- TIÊU ĐỀ CỘT: THỨ / NGÀY (Chỉ hiện trên PC) --}}
                         <thead class="bg-light text-secondary">
                             <tr>
                                 @foreach($daysMap as $dayCode)
@@ -70,18 +108,22 @@
                         <tbody>
                             <tr>
                                 @foreach($daysMap as $dayCode)
-                                    <td class="p-2" style="height: 150px; background-color: #f8f9fa;">
+                                    {{-- Thêm class desktop-cell để xử lý background và height trên PC --}}
+                                    <td class="p-2 desktop-cell">
+                                        
+                                        {{-- HEADER NGÀY (Chỉ hiện trên Mobile) --}}
+                                        <div class="d-md-none d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                            <span class="fw-bold text-uppercase text-primary">{{ $weekDates[$dayCode]['name_vn'] }}</span>
+                                            <span class="badge bg-secondary fs-6">{{ $weekDates[$dayCode]['date'] }}</span>
+                                        </div>
+
                                         @if(!empty($mySchedule[$dayCode]))
                                             @foreach($mySchedule[$dayCode] as $shift)
                                                 @php
-                                                    // Xác định màu nền dựa trên trạng thái
-                                                    $statusColor = 'bg-primary'; // Mặc định Submitted (Xanh dương)
-                                                    if($shift['status'] == 'StaffApproved') $statusColor = 'bg-success'; // Xanh lá
-                                                    if($shift['status'] == 'Approved') $statusColor = 'bg-danger'; // Đỏ
+                                                    $statusColor = 'bg-primary'; 
+                                                    if($shift['status'] == 'StaffApproved') $statusColor = 'bg-success'; 
+                                                    if($shift['status'] == 'Approved') $statusColor = 'bg-danger'; 
 
-                                                    // Kiểm tra điều kiện hiện nút Tick:
-                                                    // 1. Phải là Submitted
-                                                    // 2. Ngày hiện tại phải lớn hơn ngày cuối tuần của lịch này (Tức là tuần đã qua)
                                                     $isPastWeek = \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($currentWeek->EndDate));
                                                     $canConfirm = ($shift['status'] == 'Submitted') && $isPastWeek;
                                                 @endphp
@@ -101,7 +143,6 @@
                                                                 </div>
                                                             </div>
 
-                                                            {{-- Nút Tick xác nhận --}}
                                                             @if($canConfirm)
                                                                 <form action="{{ route('staff.confirm_assignment', $shift['id']) }}" method="POST">
                                                                     @csrf
@@ -119,9 +160,9 @@
                                                 </div>
                                             @endforeach
                                         @else
-                                            {{-- Ngày nghỉ --}}
-                                            <div class="text-muted opacity-25 mt-4">
-                                                <i class="bi bi-cup-hot fs-1"></i>
+                                            {{-- Ngày nghỉ: Đổi style một chút để hợp cả Mobile lẫn PC --}}
+                                            <div class="text-muted opacity-50 text-center py-2">
+                                                <i class="bi bi-cup-hot fs-2"></i>
                                                 <div class="small">Nghỉ</div>
                                             </div>
                                         @endif
@@ -133,27 +174,31 @@
                         {{-- FOOTER: TỔNG GIỜ --}}
                         <tfoot>
                             <tr>
-                                <td colspan="7" class="text-end bg-white p-3">
+                                {{-- Thêm class text-md-end để căn phải trên PC, căn giữa trên Mobile --}}
+                                <td colspan="7" class="text-center text-md-end bg-white p-3">
                                     <span class="text-muted me-2">Tổng giờ làm việc tuần này:</span>
                                     <span class="fw-bold fs-4 text-success">{{ $totalHours }} giờ</span>
                                 </td>
                             </tr>
                         </tfoot>
                     </table>
+                    
+                    {{-- CHÚ THÍCH TRẠNG THÁI --}}
                     <div class="mt-4 p-3 bg-white rounded shadow-sm">
                         <h6 class="fw-bold">📌 Chú thích trạng thái:</h6>
-                        <div class="d-flex gap-4">
+                        {{-- Đổi flex-wrap để tự động rớt dòng nếu màn hình nhỏ --}}
+                        <div class="d-flex flex-wrap gap-3">
                             <div class="d-flex align-items-center">
                                 <div class="rounded me-2 bg-primary" style="width: 20px; height: 20px;"></div>
-                                <small>Đã chốt lịch (Submitted)</small>
+                                <small>Đã chốt (Submitted)</small>
                             </div>
                             <div class="d-flex align-items-center">
                                 <div class="rounded me-2 bg-success" style="width: 20px; height: 20px;"></div>
-                                <small>Nhân viên đã xác nhận (StaffApproved)</small>
+                                <small>Đã xác nhận (StaffApproved)</small>
                             </div>
                             <div class="d-flex align-items-center">
                                 <div class="rounded me-2 bg-danger" style="width: 20px; height: 20px;"></div>
-                                <small>Quản lý đã duyệt (Approved)</small>
+                                <small>Quản lý duyệt (Approved)</small>
                             </div>
                         </div>
                     </div>
