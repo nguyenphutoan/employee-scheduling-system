@@ -4,78 +4,96 @@
 
 @section('content')
 <div class="container">
-    {{-- 1. THÊM THƯ VIỆN FLATPICKR VÀ CUSTOM CSS RESPONSIVE --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
-        .time-picker {
-            background-color: #fff !important;
-            cursor: pointer;
-        }
-
         /* Tùy chỉnh chiều rộng nút bấm cho responsive */
         .btn-responsive { width: 100%; }
         @media (min-width: 768px) {
             .btn-responsive { width: auto; }
         }
 
-        /* --- CSS BIẾN BẢNG THÀNH DẠNG CARD TRÊN MOBILE --- */
-        @media (max-width: 767px) {
-            .table-mobile-responsive thead { 
-                display: none; 
-            }
-            .table-mobile-responsive tbody, 
-            .table-mobile-responsive tr, 
-            .table-mobile-responsive td { 
-                display: block; 
-                width: 100%; 
-            }
-            .table-mobile-responsive tr { 
-                margin-bottom: 1rem; 
-                border: 1px solid #dee2e6; 
-                border-radius: 0.5rem; 
-                padding: 0.5rem; 
-                background-color: #fff;
-                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
-            }
-            .table-mobile-responsive tr.table-success {
-                background-color: #d1e7dd !important;
-                border-color: #badbcc;
-            }
-            .table-mobile-responsive td { 
-                display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
-                border: none; 
-                padding: 0.5rem;
-            }
-            /* Gắn nhãn cho các ô trên mobile */
-            .table-mobile-responsive td::before { 
-                content: attr(data-label); 
-                font-weight: bold; 
-                width: 25%; 
-                color: #495057;
-            }
-            /* Ô Ngày/Tháng (Header của Card) */
-            .table-mobile-responsive td:first-child { 
-                justify-content: center; 
-                text-align: center; 
-                background-color: #f8f9fa; 
-                border-radius: 0.5rem; 
-                margin-bottom: 0.5rem;
-                border-bottom: 1px solid #dee2e6;
-                padding-bottom: 0.75rem;
-            }
-            .table-mobile-responsive tr.table-success td:first-child {
-                background-color: #c3ebd7;
-            }
-            .table-mobile-responsive td:first-child::before { display: none; }
-            .table-mobile-responsive td:first-child span { font-size: 1.1rem; }
-            
-            /* Ô Input và Nút xóa */
-            .table-mobile-responsive td input { width: 70%; }
-            .table-mobile-responsive td:last-child { justify-content: flex-end; padding-top: 0; }
-            .table-mobile-responsive td:last-child::before { display: none; }
+        /* Card ngày */
+        .day-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.75rem;
+            background: #fff;
+            margin-bottom: 1rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            overflow: hidden;
+        }
+        .day-card.has-slots {
+            border-color: #198754;
+            background-color: #f8fff8;
+        }
+        .day-card-header {
+            padding: 0.75rem 1rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .day-card.has-slots .day-card-header {
+            background-color: #d1e7dd;
+            border-bottom-color: #badbcc;
+        }
+        .day-card-body {
+            padding: 0.75rem 1rem;
+        }
+
+        /* Slot row */
+        .slot-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            border: 1px solid #e9ecef;
+        }
+        .slot-row input[type="time"] {
+            flex: 1;
+            min-width: 0;
+            font-size: 1rem;
+            padding: 0.375rem 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            background-color: #fff;
+            /* Cho phép bàn phím mở trên mobile */
+            -webkit-appearance: none;
+        }
+        .slot-row .slot-separator {
+            font-weight: bold;
+            color: #6c757d;
+            flex-shrink: 0;
+        }
+        .slot-row .btn-remove-slot {
+            flex-shrink: 0;
+        }
+
+        /* Nút thêm khung giờ */
+        .btn-add-slot {
+            border: 2px dashed #0d6efd;
+            background: transparent;
+            color: #0d6efd;
+            border-radius: 0.5rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-add-slot:hover {
+            background-color: #e7f1ff;
+        }
+
+        /* Empty state */
+        .empty-slot-msg {
+            color: #adb5bd;
+            font-style: italic;
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.9rem;
         }
     </style>
 
@@ -134,63 +152,68 @@
                             <p>Vui lòng liên hệ quản lý để mở lịch tuần này.</p>
                         </div>
                     @else
-                        <form action="{{ route('staff.store') }}" method="POST">
+                        <form action="{{ route('staff.store') }}" method="POST" id="registerForm">
                             @csrf
                             <input type="hidden" name="week_id" value="{{ $week->WeekID }}">
 
-                            {{-- Bỏ min-width và thêm class table-mobile-responsive --}}
-                            <div class="table-responsive border-0">
-                               <table class="table table-hover align-middle table-mobile-responsive"> 
-                                   <thead class="table-light">
-                                        <tr>
-                                            <th style="width: 25%">Ngày</th> 
-                                            <th style="width: 30%">Từ</th>
-                                            <th style="width: 30%">Đến</th>
-                                            <th style="width: 15%"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($weekDays as $day)
-                                            @php
-                                                $oldStart = $myAvailabilities[$day['code']]->AvailableFrom ?? '';
-                                                $oldEnd = $myAvailabilities[$day['code']]->AvailableTo ?? '';
-                                                if($oldStart) $oldStart = substr($oldStart, 0, 5);
-                                                if($oldEnd) $oldEnd = substr($oldEnd, 0, 5);
-                                                $isRegistered = !empty($oldStart);
-                                            @endphp
-                                            
-                                            <tr id="row-{{ $day['code'] }}" class="{{ $isRegistered ? 'table-success' : '' }}">
-                                                <td>
-                                                    <span class="fw-bold">{{ $day['name'] }}</span><br>
-                                                    <small class="text-muted">{{ $day['date'] }}</small>
-                                                </td>
-                                                {{-- Thêm data-label để hiển thị chữ trên Mobile --}}
-                                                <td data-label="Từ:">
-                                                    <input type="text" class="form-control time-picker" 
-                                                        name="availability[{{ $day['code'] }}][start]" 
-                                                        value="{{ $oldStart }}"
-                                                        placeholder="00:00">
-                                                </td>
-                                                <td data-label="Đến:">
-                                                    <input type="text" class="form-control time-picker" 
-                                                        name="availability[{{ $day['code'] }}][end]" 
-                                                        value="{{ $oldEnd }}"
-                                                        placeholder="00:00">
-                                                </td>
-                                                <td class="text-center">
-                                                    @if($isRegistered)
-                                                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="clearRow('{{ $day['code'] }}')" title="Xóa đăng ký ngày này">
-                                                            <i class="bi bi-trash"></i> Xóa
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-info-circle"></i> 
+                                Bạn có thể đăng ký <strong>nhiều khung giờ rảnh</strong> trong mỗi ngày. Nhấn <strong>"+ Thêm khung giờ"</strong> để thêm.
+                            </p>
+
+                            @foreach($weekDays as $day)
+                                @php
+                                    $slots = $myAvailabilities[$day['code']] ?? [];
+                                    $hasSlots = count($slots) > 0;
+                                @endphp
+
+                                <div class="day-card {{ $hasSlots ? 'has-slots' : '' }}" id="card-{{ $day['code'] }}">
+                                    {{-- Header ngày --}}
+                                    <div class="day-card-header">
+                                        <div>
+                                            <span class="fw-bold">{{ $day['name'] }}</span>
+                                            <small class="text-muted ms-2">{{ $day['date'] }}</small>
+                                        </div>
+                                        <span class="badge {{ $hasSlots ? 'bg-success' : 'bg-secondary' }}" id="badge-{{ $day['code'] }}">
+                                            {{ $hasSlots ? count($slots) . ' khung giờ' : 'Chưa đăng ký' }}
+                                        </span>
+                                    </div>
+
+                                    {{-- Body: Danh sách các khung giờ --}}
+                                    <div class="day-card-body">
+                                        <div class="slots-container" id="slots-{{ $day['code'] }}">
+                                            @if($hasSlots)
+                                                @foreach($slots as $index => $slot)
+                                                    <div class="slot-row" data-day="{{ $day['code'] }}">
+                                                        <input type="time" 
+                                                               name="availability[{{ $day['code'] }}][{{ $index }}][start]" 
+                                                               value="{{ substr($slot->AvailableFrom, 0, 5) }}" 
+                                                               class="form-control"
+                                                               placeholder="Từ">
+                                                        <span class="slot-separator">→</span>
+                                                        <input type="time" 
+                                                               name="availability[{{ $day['code'] }}][{{ $index }}][end]" 
+                                                               value="{{ substr($slot->AvailableTo, 0, 5) }}" 
+                                                               class="form-control"
+                                                               placeholder="Đến">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-slot" onclick="removeSlot(this)" title="Xóa khung giờ này">
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
-                                                    @else
-                                                        <span class="text-muted small d-none d-md-inline">--</span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="empty-slot-msg" id="empty-{{ $day['code'] }}">
+                                                    Chưa có khung giờ nào — nhấn nút bên dưới để thêm
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <button type="button" class="btn-add-slot mt-2" onclick="addSlot('{{ $day['code'] }}')">
+                                            <i class="bi bi-plus-circle"></i> Thêm khung giờ
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
 
                             <div class="d-grid gap-2 mt-4">
                                 @if(!Auth::user()->EndDate)
@@ -208,30 +231,87 @@
 </div>
 
 <script>
+    // Counter để tạo index unique cho mỗi slot mới
+    let slotCounters = {};
+
     document.addEventListener('DOMContentLoaded', function() {
-        flatpickr(".time-picker", {
-            enableTime: true,       
-            noCalendar: true,       
-            dateFormat: "H:i",      // Định dạng 24h (Giờ:Phút)
-            time_24hr: true,        
-            allowInput: true        
+        // Đếm số slot hiện có cho mỗi ngày
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        days.forEach(day => {
+            const container = document.getElementById('slots-' + day);
+            slotCounters[day] = container.querySelectorAll('.slot-row').length;
         });
     });
 
-    function clearRow(dayCode) {
-        if(confirm('Bạn muốn hủy đăng ký ngày này? (Nhớ bấm LƯU để áp dụng)')) {
-            let row = document.getElementById('row-' + dayCode);
-            
-            let inputs = row.querySelectorAll('input.time-picker');
-            inputs.forEach(input => {
-                input._flatpickr.clear(); 
-                input.value = '';       
-            });
+    function addSlot(dayCode) {
+        const container = document.getElementById('slots-' + dayCode);
+        
+        // Xóa thông báo "chưa có khung giờ"
+        const emptyMsg = document.getElementById('empty-' + dayCode);
+        if (emptyMsg) emptyMsg.remove();
 
-            row.classList.remove('table-success');
-            
-            let btn = row.querySelector('button');
-            if(btn) btn.style.display = 'none';
+        // Tạo index mới
+        const index = slotCounters[dayCode] || 0;
+        slotCounters[dayCode] = index + 1;
+
+        // Tạo slot row mới
+        const slotRow = document.createElement('div');
+        slotRow.className = 'slot-row';
+        slotRow.setAttribute('data-day', dayCode);
+        slotRow.innerHTML = `
+            <input type="time" 
+                   name="availability[${dayCode}][${index}][start]" 
+                   class="form-control"
+                   placeholder="Từ">
+            <span class="slot-separator">→</span>
+            <input type="time" 
+                   name="availability[${dayCode}][${index}][end]" 
+                   class="form-control"
+                   placeholder="Đến">
+            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-slot" onclick="removeSlot(this)" title="Xóa khung giờ này">
+                <i class="bi bi-trash"></i>
+            </button>
+        `;
+
+        container.appendChild(slotRow);
+        updateDayStatus(dayCode);
+
+        // Focus vào input đầu tiên của slot mới
+        slotRow.querySelector('input[type="time"]').focus();
+    }
+
+    function removeSlot(btn) {
+        const slotRow = btn.closest('.slot-row');
+        const dayCode = slotRow.getAttribute('data-day');
+        
+        slotRow.remove();
+        updateDayStatus(dayCode);
+
+        // Nếu không còn slot nào, hiển thị lại thông báo trống
+        const container = document.getElementById('slots-' + dayCode);
+        if (container.querySelectorAll('.slot-row').length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-slot-msg';
+            emptyMsg.id = 'empty-' + dayCode;
+            emptyMsg.textContent = 'Chưa có khung giờ nào — nhấn nút bên dưới để thêm';
+            container.appendChild(emptyMsg);
+        }
+    }
+
+    function updateDayStatus(dayCode) {
+        const container = document.getElementById('slots-' + dayCode);
+        const card = document.getElementById('card-' + dayCode);
+        const badge = document.getElementById('badge-' + dayCode);
+        const slotCount = container.querySelectorAll('.slot-row').length;
+
+        if (slotCount > 0) {
+            card.classList.add('has-slots');
+            badge.className = 'badge bg-success';
+            badge.textContent = slotCount + ' khung giờ';
+        } else {
+            card.classList.remove('has-slots');
+            badge.className = 'badge bg-secondary';
+            badge.textContent = 'Chưa đăng ký';
         }
     }
 </script>

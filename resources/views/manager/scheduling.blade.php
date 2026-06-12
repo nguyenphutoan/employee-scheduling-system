@@ -150,20 +150,22 @@
                     <div class="list-group mb-4 shadow-sm" style="max-height: 300px; overflow-y: auto;">
                         @forelse($availableStaffs as $avail)
                             @if($avail->user)
-                                <label class="list-group-item d-flex gap-3 cursor-pointer list-group-item-action align-items-center">
-                                    <input class="form-check-input flex-shrink-0 user-select-radio fs-5" 
+                                <label class="list-group-item d-flex gap-3 cursor-pointer list-group-item-action align-items-start">
+                                    <input class="form-check-input flex-shrink-0 user-select-radio fs-5 mt-1" 
                                         type="radio" 
                                         name="user_id" 
                                         value="{{ $avail->user->UserID }}" 
-                                        data-start="{{ substr($avail->AvailableFrom, 0, 5) }}"
-                                        data-end="{{ substr($avail->AvailableTo, 0, 5) }}"
+                                        data-start="{{ substr($avail->slots->first()->AvailableFrom, 0, 5) }}"
+                                        data-end="{{ substr($avail->slots->first()->AvailableTo, 0, 5) }}"
                                         required>
                                     <span>
                                         <strong class="fs-6">{{ $avail->user->FullName }}</strong>
                                         <br>
-                                        <span class="badge bg-light text-dark border mt-1">
-                                            🕒 Rảnh: {{ substr($avail->AvailableFrom, 0, 5) }} - {{ substr($avail->AvailableTo, 0, 5) }}
-                                        </span>
+                                        @foreach($avail->slots as $slot)
+                                            <span class="badge bg-light text-dark border mt-1">
+                                                🕒 {{ substr($slot->AvailableFrom, 0, 5) }} - {{ substr($slot->AvailableTo, 0, 5) }}
+                                            </span>
+                                        @endforeach
                                     </span>
                                 </label>
                             @endif

@@ -29,10 +29,11 @@ class StaffController extends Controller
         if ($week) {
             $data = EmpAvailability::where('WeekID', $week->WeekID)
                                    ->where('UserID', Auth::id())
+                                   ->orderBy('AvailableFrom', 'asc')
                                    ->get();
-            // Chuyển về dạng mảng cho dễ dùng ở View: ['Mon' =>Object, 'Tue' => Object...]
+            // Chuyển về dạng mảng nhiều slot: ['Mon' => [obj1, obj2], 'Tue' => [obj1]...]
             foreach($data as $item) {
-                $myAvailabilities[$item->DayOfWeek] = $item;
+                $myAvailabilities[$item->DayOfWeek][] = $item;
             }
         }
 
@@ -52,7 +53,7 @@ class StaffController extends Controller
         return view('staff.register', compact('week', 'weekDays', 'myAvailabilities', 'date'));
     }
 
-    // 2. Lưu dữ liệu đăng ký
+    // 2. Lưu dữ liệu đăng ký (Hỗ trợ nhiều khung giờ/ngày)
     public function store(Request $request)
     {
         $request->validate([
@@ -61,40 +62,65 @@ class StaffController extends Controller
 
         $userId = Auth::id();
         $weekId = $request->week_id;
-        $inputs = $request->input('availability'); // Mảng dữ liệu từ form
+        $inputs = $request->input('availability', []); // Mảng dữ liệu từ form
 
-        // Duyệt qua từng ngày (Mon, Tue...)
-        foreach ($inputs as $day => $times) {
-            // TRƯỜNG HỢP 1: Người dùng có nhập đủ giờ
-            if (!empty($times['start']) && !empty($times['end'])) {
-                
-                // --- LOGIC MỚI: Kiểm tra Giờ Bắt đầu < Giờ Kết thúc ---
-                if ($times['start'] >= $times['end']) {
-                    // Lấy tên ngày tiếng Việt để báo lỗi cho dễ hiểu
-                    $dayName = $this->getDayName($day); 
-                    return back()->withErrors(['msg' => "Lỗi tại $dayName: Giờ 'Rảnh từ' phải nhỏ hơn giờ 'Đến'!"])->withInput();
+        // Bước 1: Validate tất cả trước khi lưu
+        foreach ($inputs as $day => $slots) {
+            if (!is_array($slots)) continue;
+
+            $dayName = $this->getDayName($day);
+            $validSlots = [];
+
+            foreach ($slots as $index => $times) {
+                $start = $times['start'] ?? '';
+                $end = $times['end'] ?? '';
+
+                // Bỏ qua slot trống
+                if (empty($start) && empty($end)) continue;
+
+                // Phải nhập đủ cả 2
+                if (empty($start) || empty($end)) {
+                    return back()->withErrors(['msg' => "Lỗi tại $dayName: Vui lòng nhập đủ giờ Bắt đầu và Kết thúc!"])->withInput();
                 }
 
-                // Nếu hợp lệ thì Lưu/Cập nhật
-                EmpAvailability::updateOrCreate(
-                    [
+                // Giờ bắt đầu < Giờ kết thúc
+                if ($start >= $end) {
+                    return back()->withErrors(['msg' => "Lỗi tại $dayName: Giờ 'Rảnh từ' ($start) phải nhỏ hơn giờ 'Đến' ($end)!"])->withInput();
+                }
+
+                // Kiểm tra trùng lặp với các slot khác trong cùng ngày
+                foreach ($validSlots as $existing) {
+                    if ($start < $existing['end'] && $end > $existing['start']) {
+                        return back()->withErrors(['msg' => "Lỗi tại $dayName: Khung giờ $start-$end bị trùng với {$existing['start']}-{$existing['end']}!"])->withInput();
+                    }
+                }
+
+                $validSlots[] = ['start' => $start, 'end' => $end];
+            }
+        }
+
+        // Bước 2: Xóa toàn bộ availability cũ của user trong tuần này
+        EmpAvailability::where('UserID', $userId)
+                       ->where('WeekID', $weekId)
+                       ->delete();
+
+        // Bước 3: Insert tất cả slot mới
+        foreach ($inputs as $day => $slots) {
+            if (!is_array($slots)) continue;
+
+            foreach ($slots as $times) {
+                $start = $times['start'] ?? '';
+                $end = $times['end'] ?? '';
+
+                if (!empty($start) && !empty($end)) {
+                    EmpAvailability::create([
                         'UserID' => $userId,
                         'WeekID' => $weekId,
-                        'DayOfWeek' => $day
-                    ],
-                    [
-                        'AvailableFrom' => $times['start'],
-                        'AvailableTo' => $times['end']
-                    ]
-                );
-            } 
-            // TRƯỜNG HỢP 2: Người dùng để trống (hoặc đã bấm nút xóa trên giao diện)
-            else {
-                // Xóa bản ghi trong Database
-                EmpAvailability::where('UserID', $userId)
-                            ->where('WeekID', $weekId)
-                            ->where('DayOfWeek', $day)
-                            ->delete();
+                        'DayOfWeek' => $day,
+                        'AvailableFrom' => $start,
+                        'AvailableTo' => $end,
+                    ]);
+                }
             }
         }
 

@@ -55,10 +55,19 @@ class ManagerController extends Controller
                                  ->first();
             
             // 5. Lấy danh sách nhân viên CÓ ĐĂNG KÝ RẢNH trong ngày này
-            $availableStaffs = EmpAvailability::where('WeekID', $currentWeek->WeekID)
+            $rawAvailabilities = EmpAvailability::where('WeekID', $currentWeek->WeekID)
                                               ->where('DayOfWeek', $dayOfWeek)
                                               ->with('user')
+                                              ->orderBy('AvailableFrom', 'asc')
                                               ->get();
+
+            // Group theo UserID để gộp nhiều slot của cùng 1 người
+            $availableStaffs = $rawAvailabilities->groupBy('UserID')->map(function ($slots) {
+                return (object) [
+                    'user' => $slots->first()->user,
+                    'slots' => $slots,
+                ];
+            })->values();
         }
         // Tạo danh sách các ngày trong tuần để hiển thị thanh menu trên cùng
         $weekDates = [];
@@ -109,27 +118,38 @@ class ManagerController extends Controller
         $shift = Shift::findOrFail($request->shift_id);
 
         // 3. LOGIC KIỂM TRA RÀNG BUỘC THỜI GIAN
-        // Tìm lịch rảnh của nhân viên đó trong tuần đó, thứ đó
-        $availability = EmpAvailability::where('UserID', $request->user_id)
+        // Tìm tất cả lịch rảnh của nhân viên đó trong tuần đó, thứ đó
+        $availabilities = EmpAvailability::where('UserID', $request->user_id)
                                        ->where('WeekID', $shift->WeekID)
                                        ->where('DayOfWeek', $shift->DayOfWeek)
-                                       ->first();
+                                       ->get();
 
-        if (!$availability) {
+        if ($availabilities->isEmpty()) {
             return back()->withErrors(['msg' => 'Nhân viên này chưa đăng ký lịch rảnh vào ngày này!']);
         }
 
-        // So sánh thời gian
-        // Logic: Giờ xếp >= Giờ rảnh bắt đầu AND Giờ xếp <= Giờ rảnh kết thúc
+        // So sánh thời gian: Ca được phân công phải nằm trong ÍT NHẤT 1 slot rảnh
         $reqStart = strtotime($request->start_time);
         $reqEnd   = strtotime($request->end_time);
-        $availStart = strtotime($availability->AvailableFrom);
-        $availEnd   = strtotime($availability->AvailableTo);
+        $fitsInSlot = false;
 
-        if ($reqStart < $availStart || $reqEnd > $availEnd) {
+        foreach ($availabilities as $availability) {
+            $availStart = strtotime($availability->AvailableFrom);
+            $availEnd   = strtotime($availability->AvailableTo);
+
+            if ($reqStart >= $availStart && $reqEnd <= $availEnd) {
+                $fitsInSlot = true;
+                break;
+            }
+        }
+
+        if (!$fitsInSlot) {
+            $slotTexts = $availabilities->map(function ($a) {
+                return substr($a->AvailableFrom, 0, 5) . '-' . substr($a->AvailableTo, 0, 5);
+            })->implode(', ');
             
             return back()->withErrors([
-                'msg' => "Không hợp lệ! Nhân viên chỉ rảnh từ " . substr($availability->AvailableFrom, 0, 5) . " đến " . substr($availability->AvailableTo, 0, 5)
+                'msg' => "Không hợp lệ! Nhân viên chỉ rảnh các khung: $slotTexts"
             ]);
         }
 
