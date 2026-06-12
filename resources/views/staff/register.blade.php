@@ -88,10 +88,11 @@
             color: #c0c0c0;
             font-weight: 400;
         }
-        .time-group .time-label {
-            font-size: 0.8rem;
-            color: #6c757d;
-            white-space: nowrap;
+        .time-group .time-colon {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #495057;
+            line-height: 1;
         }
 
         /* Mũi tên giữa 2 nhóm */
@@ -139,8 +140,8 @@
                 width: 36px;
                 font-size: 1rem;
             }
-            .time-group .time-label {
-                font-size: 0.7rem;
+            .time-group .time-colon {
+                font-size: 1rem;
             }
             .slot-row {
                 gap: 0.3rem;
@@ -248,13 +249,12 @@
                                                                    value="{{ $startParts[0] }}" placeholder="00"
                                                                    data-role="start-h"
                                                                    onfocus="this.select()">
-                                                            <span class="time-label">giờ</span>
+                                                            <span class="time-colon">:</span>
                                                             <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
                                                                    class="time-input ti-min" 
                                                                    value="{{ $startParts[1] }}" placeholder="00"
                                                                    data-role="start-m"
                                                                    onfocus="this.select()">
-                                                            <span class="time-label">phút</span>
                                                         </div>
 
                                                         <span class="slot-arrow">→</span>
@@ -266,13 +266,12 @@
                                                                    value="{{ $endParts[0] }}" placeholder="00"
                                                                    data-role="end-h"
                                                                    onfocus="this.select()">
-                                                            <span class="time-label">giờ</span>
+                                                            <span class="time-colon">:</span>
                                                             <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
                                                                    class="time-input ti-min" 
                                                                    value="{{ $endParts[1] }}" placeholder="00"
                                                                    data-role="end-m"
                                                                    onfocus="this.select()">
-                                                            <span class="time-label">phút</span>
                                                         </div>
 
                                                         {{-- Hidden inputs cho form submit --}}
@@ -449,22 +448,20 @@
                 <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
                        class="time-input ti-hour" placeholder="00"
                        data-role="start-h" onfocus="this.select()">
-                <span class="time-label">giờ</span>
+                <span class="time-colon">:</span>
                 <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
                        class="time-input ti-min" placeholder="00"
                        data-role="start-m" onfocus="this.select()">
-                <span class="time-label">phút</span>
             </div>
             <span class="slot-arrow">→</span>
             <div class="time-group">
                 <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
                        class="time-input ti-hour" placeholder="00"
                        data-role="end-h" onfocus="this.select()">
-                <span class="time-label">giờ</span>
+                <span class="time-colon">:</span>
                 <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"
                        class="time-input ti-min" placeholder="00"
                        data-role="end-m" onfocus="this.select()">
-                <span class="time-label">phút</span>
             </div>
             <input type="hidden" name="availability[${dayCode}][${index}][start]" class="hidden-start">
             <input type="hidden" name="availability[${dayCode}][${index}][end]" class="hidden-end">
