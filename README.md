@@ -63,23 +63,7 @@ This project provides a complete shift management system that includes:
    ```bash
    php artisan migrate
    ```
-6. **Install Frontend dependencies via NPM:**
-   ```bash
-   npm install
-   ```
-7. **Compile Frontend Assets:**
-   ```bash
-   npm run dev
-   ```
-
-### ⚡ Quick Setup
-
-A convenient custom script is available to automate the entire installation process:
-```bash
-composer run setup
-```
-*(This command automatically installs composer dependencies, creates the .env file, generates the app key, migrates the database, installs npm packages, and builds frontend assets).*
-
+   
 ## 🚀 Running the App
 
 Start the Laravel Development Server:
