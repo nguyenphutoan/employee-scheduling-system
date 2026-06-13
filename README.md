@@ -1,115 +1,114 @@
-# EmpScheduleLaravel
+# Employee Scheduling System
 
-Laravel-based employee scheduling application for manager and staff workflow.
+A comprehensive employee scheduling application built with Laravel, featuring dedicated workflows and permissions for Managers and Staff.
 
-## Overview
+## 🌟 Overview
 
-This project provides a schedule management system including:
-- Role-based login for managers and staff.
-- Weekly shift scheduling with morning/evening assignments.
-- Employee availability submission and status tracking.
-- Manager dashboard, employee management, and payroll overview.
-- In-app chat between authenticated users.
-- Excel schedule export using `maatwebsite/excel`.
+This project provides a complete shift management system that includes:
+- Role-based authentication and specialized access for Managers and Staff.
+- Weekly shift scheduling with clear morning and evening shift assignments.
+- Staff availability registration and status tracking.
+- Interactive dashboards, employee profile management, and payroll tracking.
+- Built-in real-time messaging (Chat) system between authenticated users.
+- Schedule export to Excel files using `maatwebsite/excel`.
 
-## Key Features
+## 🚀 Key Features
 
-- Manager functions:
-  - View manager dashboard and weekly schedule.
-  - Create new weeks with morning/evening shifts.
-  - Assign staff to shifts and approve assignments.
-  - Track availability and employee registration status.
-  - Export schedule to `.xlsx`.
+### 👨‍💼 For Managers
+- **Dashboard & Scheduling**: View system overview and track weekly schedules.
+- **Create & Approve Schedules**: Create new work weeks, assign staff to morning/evening shifts, and finalize schedules.
+- **Employee Management**: Add, update, and remove employees, as well as track their active status (active/resigned).
+- **Availability Tracking**: Monitor staff's submitted availability to make informed scheduling decisions.
+- **Payroll Management**: Overview of timesheets and payroll for all employees.
+- **Export Reports**: Export the weekly schedule to an `.xlsx` format.
 
-- Staff functions:
-  - View individual dashboard and payroll summary.
-  - Register availability for upcoming weeks.
-  - Confirm assignment notifications.
-  - Update personal profile.
+### 👩‍💻 For Staff
+- **Personal Dashboard**: View assigned shifts and a personal payroll summary.
+- **Register Availability**: Proactively submit availability for upcoming weeks.
+- **Shift Confirmation**: Receive notifications and confirm assigned shifts.
+- **Profile Management**: Update personal details and change passwords.
 
-- Shared features:
-  - Authentication and session handling.
-  - Real-time-style messaging via chat routes.
-  - Structured data models for weeks, shifts, positions, assignments, and availability.
+### 🔄 Shared Features
+- **Authentication & Security**: Secure Auth system that prevents access for inactive/resigned employees.
+- **Direct Messaging (Chat)**: Communicate directly within the application.
+- **Optimized Data Structure**: Robust Eloquent Models for Users, Weeks, Shifts, Positions, Assignments, Availability, and Messages.
 
-## Tech Stack
+## 🛠 Tech Stack
 
-- PHP 8.2
-- Laravel 12
-- Tailwind CSS + Vite
-- Maatwebsite Excel for exports
-- SQLite or database driver configured in `.env`
+- **PHP 8.2**
+- **Laravel 12**
+- **Tailwind CSS + Vite** (Frontend Styling & Build Tool)
+- **Maatwebsite Excel** (Excel Data Export)
+- **SQLite** (Default) or any other DBMS configured in `.env`
 
-## Installation
+## ⚙️ Installation
 
-1. Clone the repository.
-2. Copy the environment file:
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   ```
+2. **Copy the environment configuration file:**
    ```bash
    copy .env.example .env
    ```
-3. Install PHP dependencies:
+3. **Install PHP dependencies via Composer:**
    ```bash
    composer install
    ```
-4. Generate application key:
+4. **Generate the application key:**
    ```bash
    php artisan key:generate
    ```
-5. Run database migrations:
+5. **Run Database Migrations:**
    ```bash
    php artisan migrate
    ```
-6. Install frontend dependencies:
+6. **Install Frontend dependencies via NPM:**
    ```bash
    npm install
    ```
-7. Build assets or start development server:
+7. **Compile Frontend Assets:**
    ```bash
    npm run dev
    ```
 
-## Quick Setup
+### ⚡ Quick Setup
 
-A single setup command is available:
-
+A convenient custom script is available to automate the entire installation process:
 ```bash
 composer run setup
 ```
+*(This command automatically installs composer dependencies, creates the .env file, generates the app key, migrates the database, installs npm packages, and builds frontend assets).*
 
-This will install dependencies, create `.env`, generate the app key, run migrations, install npm packages, and build assets.
+## 🚀 Running the App
 
-## Running the Application
-
-Start the Laravel development server:
-
+Start the Laravel Development Server:
 ```bash
 php artisan serve
 ```
+Then, open your web browser and navigate to the URL displayed in your terminal (typically `http://localhost:8000`).
 
-Then open the local URL shown in the terminal.
+## 🧪 Testing
 
-## Testing
-
-Run the PHPUnit test suite with:
-
+To run the PHPUnit test suite, execute:
 ```bash
 composer test
 ```
 
-## Project Structure
+## 📁 Project Structure
 
-- `app/Http/Controllers` – Controller logic for auth, manager, staff, and chat.
-- `app/Exports` – Excel export implementation.
-- `app/Models` – Eloquent models for users, weeks, shifts, availability, positions, assignments, and messages.
-- `database/migrations` – Database schema for users, weeks, shifts, availability, positions, assignments, and messages.
-- `resources/views` – Blade templates for login, manager, staff, chat, and exports.
-- `routes/web.php` – Web routes for authentication, manager, staff, and chat flows.
+- `app/Http/Controllers/` – Application logic and flow (Auth, Manager, Staff, Chat).
+- `app/Exports/` – Logic for exporting data to Excel.
+- `app/Models/` – Eloquent models interacting with the database.
+- `database/migrations/` – Database schema definitions.
+- `resources/views/` – Blade template files for the UI.
+- `routes/web.php` – Web routing configurations (Public, Manager, Staff).
 
-## Notes
+## 📝 Notes
 
-- The app includes a manager and staff role flow.
-- Use `.env` to configure database connection, mail, and other environment settings.
+- The application has distinct routing and access control flows for Managers and Staff.
+- Modify the `.env` file to customize your Database connection (e.g., MySQL/PostgreSQL), Mail configuration, and other environment variables.
 
-## License
+## 📄 License
 
-This project is open source and uses the MIT license.
+This open-source project is licensed under the [MIT license](https://opensource.org/licenses/MIT).
