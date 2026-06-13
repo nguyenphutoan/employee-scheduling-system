@@ -37,9 +37,9 @@ This project provides a complete shift management system that includes:
 
 - **PHP 8.2**
 - **Laravel 12**
-- **Tailwind CSS + Vite** (Frontend Styling & Build Tool)
+- **Bootstrap CSS** (Frontend Styling)
 - **Maatwebsite Excel** (Excel Data Export)
-- **SQLite** (Default) or any other DBMS configured in `.env`
+- **MySQL** (Default) or any other DBMS configured in `.env`
 
 ## ⚙️ Installation
 
